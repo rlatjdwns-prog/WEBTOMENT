@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>그 보도, 정정이 필요합니다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Pretendard:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EFE4; --paper-2:#ECE6D6; --ink:#1B1B1E; --ink-soft:#5A564C;
+    --red:#B7392E; --red-dark:#8F2A22; --navy:#243349; --highlight:#F0C34E;
+    --line:#D6CDB4; --white:#FCFAF4; --radius:2px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px),
+      var(--paper);
+    color:var(--ink); font-family:'Pretendard', -apple-system, sans-serif;
+    line-height:1.55; min-height:100vh; padding-bottom:60px;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:0 20px;}
+  header.top{
+    border-bottom:3px solid var(--ink); padding:22px 20px 14px;
+    display:flex; align-items:baseline; justify-content:space-between;
+    max-width:760px; margin:0 auto;
+  }
+  .brand{font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.14em; color:var(--red); font-weight:600;}
+  .navlinks{display:flex; gap:14px;}
+  .navlinks button{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.06em;
+    background:none; border:1px solid var(--ink); color:var(--ink); padding:6px 10px; cursor:pointer; border-radius:var(--radius);
+  }
+  .navlinks button:hover{background:var(--ink); color:var(--paper);}
+  .hero{padding:44px 0 30px;}
+  .hero .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--red);
+    letter-spacing:0.12em; margin-bottom:14px; display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{content:"✎"; font-size:14px;}
+  .hero h1{
+    font-family:'Noto Serif KR', serif; font-weight:900; font-size:clamp(30px, 6vw, 44px);
+    line-height:1.28; letter-spacing:-0.01em; margin-bottom:18px;
+  }
+  .hero h1 .strike{color:var(--red-dark);}
+  .hero p.lede{font-size:16px; color:var(--ink-soft); max-width:52ch; margin-bottom:26px;}
+  .stat-line{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft); margin-bottom:22px;}
+  .stat-line b{color:var(--ink); font-weight:600;}
+  .cta-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .btn{
+    font-family:'Pretendard', sans-serif; font-weight:600; font-size:15px; padding:14px 26px;
+    border-radius:var(--radius); cursor:pointer; border:2px solid var(--ink); transition:transform .12s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--ink); color:var(--paper);}
+  .btn-primary:hover{background:var(--red-dark); border-color:var(--red-dark);}
+  .btn-ghost{background:transparent; color:var(--ink);}
+  .btn-ghost:hover{background:var(--ink); color:var(--paper);}
+  .btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .btn:disabled:hover{background:transparent; color:var(--ink);}
+
+  /* consent form */
+  .form-card{background:var(--white); border:1px solid var(--line); padding:28px 26px; box-shadow:0 3px 0 rgba(27,27,30,0.06); margin-bottom:24px;}
+  .form-card h2{font-family:'Noto Serif KR', serif; font-size:21px; margin-bottom:6px;}
+  .form-card .sub{font-size:13px; color:var(--ink-soft); margin-bottom:20px;}
+  .form-card label{display:block; font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); margin:14px 0 5px;}
+  .form-card input{width:100%; padding:11px; border:1px solid var(--line); background:var(--white); font-family:'Pretendard', sans-serif; font-size:14px; border-radius:var(--radius);}
+  .consent-box{
+    margin-top:20px; padding:14px 16px; background:var(--paper-2); border:1px solid var(--line);
+    font-size:12.5px; color:var(--ink-soft); max-height:160px; overflow-y:auto; line-height:1.6;
+  }
+  .consent-box h4{font-size:12.5px; color:var(--ink); margin-bottom:6px;}
+  .consent-check{display:flex; align-items:flex-start; gap:8px; margin-top:14px; font-size:13.5px;}
+  .consent-check input{width:auto; margin-top:3px;}
+  .form-note{font-size:12px; color:var(--ink-soft); margin-top:10px;}
+
+  .stage-bar{display:flex; align-items:center; justify-content:space-between; margin:0 0 26px; padding-top:26px; border-top:1px solid var(--line);}
+  .stage-name{font-family:'Noto Serif KR', serif; font-weight:700; font-size:20px;}
+  .stage-count{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);}
+  .progress-track{height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-bottom:34px;}
+  .progress-fill{height:100%; background:var(--red); transition:width .3s ease;}
+  .matchup{display:flex; flex-direction:column; gap:0; position:relative;}
+  .vs-mark{
+    align-self:center; width:46px; height:46px; border-radius:50%; border:2px solid var(--red); color:var(--red);
+    display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600;
+    font-size:13px; background:var(--paper); margin:-16px auto; z-index:2; transform:rotate(-6deg);
+  }
+  .clip{
+    background:var(--white); border:1px solid var(--line); box-shadow:0 3px 0 rgba(27,27,30,0.06);
+    padding:26px 24px 22px; cursor:pointer; text-align:left; position:relative; transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .clip:hover{transform:translateY(-2px); box-shadow:0 6px 14px rgba(27,27,30,0.10);}
+  .clip:active{transform:translateY(0px);}
+  .clip .outlet{font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; color:var(--navy); text-transform:uppercase; margin-bottom:10px;}
+  .clip .headline{font-family:'Noto Serif KR', serif; font-weight:700; font-size:19px; line-height:1.4; margin-bottom:10px;}
+  .clip .quote{font-size:14px; color:var(--ink-soft); border-left:2px solid var(--line); padding-left:12px; margin-top:8px;}
+  .clip .pick-tag{margin-top:16px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--red); letter-spacing:0.06em;}
+  .clip .pick-tag::after{content:" →";}
+  .question-line{text-align:center; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); margin:18px 0 22px;}
+  .final-stamp{text-align:center; padding:30px 20px 10px;}
+  .stamp{
+    display:inline-block; border:3px solid var(--red); color:var(--red); font-family:'IBM Plex Mono', monospace;
+    font-weight:700; font-size:13px; letter-spacing:0.14em; padding:8px 16px; transform:rotate(-4deg); border-radius:4px; margin-bottom:22px;
+  }
+  .result-card{background:var(--white); border:1px solid var(--line); padding:30px 26px; box-shadow:0 3px 0 rgba(27,27,30,0.06); margin-bottom:24px;}
+  .result-card .outlet{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--navy); letter-spacing:0.08em; margin-bottom:10px;}
+  .result-card h2{font-family:'Noto Serif KR', serif; font-size:24px; font-weight:800; margin-bottom:14px; line-height:1.4;}
+  .result-card .quote{font-size:14px; color:var(--ink-soft); border-left:2px solid var(--red); padding-left:14px; margin-bottom:16px;}
+  .result-card .desc{font-size:14.5px; color:var(--ink); margin-bottom:14px;}
+  .result-card a.source{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--navy); text-decoration:underline;}
+  .end-actions{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:40px;}
+  .stats-row{display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--line);}
+  .stats-rank{font-family:'Noto Serif KR', serif; font-weight:900; font-size:22px; color:var(--red); width:34px; flex-shrink:0;}
+  .stats-info{flex:1;}
+  .stats-info .title{font-weight:600; font-size:15px; margin-bottom:2px;}
+  .stats-info .meta{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft);}
+  .stats-bar-track{height:6px; background:var(--line); border-radius:4px; margin-top:6px; overflow:hidden;}
+  .stats-bar-fill{height:100%; background:var(--red);}
+  .empty-note{color:var(--ink-soft); font-size:14px; padding:30px 0; text-align:center;}
+  .hidden{display:none !important;}
+  @media(max-width:600px){ .hero{padding-top:30px;} .clip{padding:20px 18px 18px;} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">MEDIA CORRECTION DESK</div>
+  <div class="navlinks">
+    <button id="nav-stats">통계</button>
+    <button id="nav-home">처음으로</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ HOME ============ -->
+  <section id="view-home">
+    <div class="hero">
+      <div class="eyebrow">언론·미디어 왜곡 토너먼트</div>
+      <h1>그 보도, <span class="strike">정정</span>이 필요합니다</h1>
+      <p class="lede">정신질환을 다룬 실제 보도 사례 두 개가 매번 무작위로 맞붙습니다. 더 편견을 부추기는 쪽을 직접 골라 최종 사례까지 가려보세요.</p>
+      <div class="stat-line" id="home-stat-line">사례 불러오는 중…</div>
+      <div class="cta-row">
+        <button class="btn btn-primary" id="start-btn" disabled>참여하기</button>
+        <button class="btn btn-ghost" id="stats-btn-home">누적 통계 보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONSENT ============ -->
+  <section id="view-consent" class="hidden">
+    <div class="form-card">
+      <h2>참여 전 정보 입력</h2>
+      <div class="sub">아래 정보는 참여 확인 및 결과 안내 목적으로만 사용됩니다.</div>
+
+      <label>이름</label>
+      <input type="text" id="c-name" placeholder="홍길동">
+      <label>연락처</label>
+      <input type="tel" id="c-phone" placeholder="010-0000-0000">
+      <label>주소</label>
+      <input type="text" id="c-address" placeholder="자택 또는 소속 기관 주소">
+
+      <div class="consent-box">
+        <h4>개인정보 수집·이용 동의 (필수)</h4>
+        <p>
+          1. 수집 항목: 이름, 연락처, 주소<br>
+          2. 수집 목적: 캠페인 참여자 확인, 참여 결과 및 후속 활동(캠페인 결과 공유, 관련 행사 안내 등) 안내<br>
+          3. 보유 및 이용 기간: 수집일로부터 1년 또는 목적 달성 시까지<br>
+          4. 동의를 거부할 권리가 있으며, 동의 거부 시 캠페인 참여가 제한될 수 있습니다.
+        </p>
+        <p style="margin-top:8px; color:var(--red-dark);">※ 이 문구는 초안 예시입니다. 실제 배포 전 기관의 개인정보처리방침 담당자 검토를 받아 정식 문구로 교체해 주세요.</p>
+      </div>
+      <label class="consent-check">
+        <input type="checkbox" id="c-consent">
+        <span>위 개인정보 수집·이용에 동의합니다. (필수)</span>
+      </label>
+
+      <div class="cta-row" style="margin-top:20px;">
+        <button class="btn btn-primary" id="consent-submit" disabled>동의하고 시작하기</button>
+        <button class="btn btn-ghost" id="consent-cancel">취소</button>
+      </div>
+      <div class="form-note" id="consent-error"></div>
+    </div>
+  </section>
+
+  <!-- ============ MATCH ============ -->
+  <section id="view-match" class="hidden">
+    <div class="stage-bar">
+      <div class="stage-name" id="stage-name">초교</div>
+      <div class="stage-count" id="stage-count">1 / 8</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="question-line" id="question-line">어떤 보도가 정신질환에 대한 편견을 더 부추길까요?</div>
+    <div class="matchup">
+      <div class="clip" id="card-a"></div>
+      <div class="vs-mark">VS</div>
+      <div class="clip" id="card-b"></div>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section id="view-result" class="hidden">
+    <div class="final-stamp"><div class="stamp">최종 확인 완료</div></div>
+    <div class="result-card" id="result-card"></div>
+    <div class="end-actions">
+      <button class="btn btn-primary" id="restart-btn">다시 하기</button>
+      <button class="btn btn-ghost" id="to-stats-btn">누적 통계 보기</button>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section id="view-stats" class="hidden">
+    <div class="hero" style="padding-top:36px;">
+      <div class="eyebrow">누적 기록</div>
+      <h1 style="font-size:clamp(26px,5vw,34px);">가장 많이 지목된 왜곡</h1>
+      <p class="lede">참여자들이 라운드마다 고른 선택이 쌓인 결과입니다.</p>
+    </div>
+    <div class="stats-list" id="stats-list"></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  // ⬇️ Apps Script 배포 후 발급되는 웹 앱 URL로 반드시 교체하세요 (.../exec 로 끝남)
+  const GAS_URL = "https://script.google.com/macros/s/여기에_배포_ID를_넣으세요/exec";
+
+  const MAX_BRACKET = 16;
+  const QUESTION_TEXT = "어떤 보도가 정신질환에 대한 편견을 더 부추길까요?";
+  const STAGE_NAMES = { 2:"최종 확인", 4:"삼교", 8:"재교", 16:"초교", 32:"교열" };
+
+  let cases = [];
+  let bracket = [];
+  let roundIdx = 0;
+  let matchIdx = 0;
+  let winnersOfRound = [];
+  let totalRounds = 0;
+
+  const $ = (id) => document.getElementById(id);
+
+  function show(view){
+    ['home','consent','match','result','stats'].forEach(v=>{
+      $('view-'+v).classList.toggle('hidden', v!==view);
+    });
+  }
+
+  async function loadData(){
+    try{
+      const res = await fetch(GAS_URL + '?action=data');
+      const json = await res.json();
+      cases = json.cases || [];
+    }catch(e){
+      cases = [];
+      console.error('데이터 로드 실패 — GAS_URL 설정을 확인하세요.', e);
+    }
+    renderHome();
+  }
+
+  function renderHome(){
+    const n = cases.length;
+    $('home-stat-line').innerHTML = n >= 2
+      ? `현재 등록된 사례 <b>${n}개</b>. 이번 판은 <b>${bracketSizeFor(n)}강</b>으로 진행됩니다.`
+      : `등록된 사례가 부족합니다 (${n}개). 구글시트 "사례" 탭에 최소 2개 이상 입력해 주세요.`;
+    $('start-btn').disabled = n < 2;
+  }
+
+  function bracketSizeFor(n){
+    let size = 2;
+    while(size*2 <= n && size*2 <= MAX_BRACKET) size *= 2;
+    return size;
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  function startTournament(){
+    const size = bracketSizeFor(cases.length);
+    const pool = shuffle(cases).slice(0, size);
+    const firstRound = [];
+    for(let i=0;i<pool.length;i+=2){
+      firstRound.push({a:pool[i], b:pool[i+1]});
+    }
+    bracket = [firstRound];
+    roundIdx = 0; matchIdx = 0; winnersOfRound = [];
+    totalRounds = Math.log2(size);
+    show('match');
+    renderMatch();
+  }
+
+  function currentStageName(){
+    const remaining = totalRounds - roundIdx;
+    const sizeAtThisRound = Math.pow(2, remaining);
+    return STAGE_NAMES[sizeAtThisRound] || (sizeAtThisRound+"강");
+  }
+
+  function bracket_total_matches(){
+    const size = Math.pow(2, totalRounds);
+    return size - 1;
+  }
+
+  function renderMatch(){
+    const round = bracket[roundIdx];
+    const m = round[matchIdx];
+    $('stage-name').innerHTML = currentStageName();
+    $('stage-count').textContent = `${matchIdx+1} / ${round.length}`;
+    $('question-line').textContent = QUESTION_TEXT;
+
+    const doneMatches = bracket.slice(0, roundIdx).reduce((s,r)=>s+r.length,0) + matchIdx;
+    $('progress-fill').style.width = Math.round((doneMatches/bracket_total_matches())*100)+'%';
+
+    $('card-a').innerHTML = cardHTML(m.a);
+    $('card-b').innerHTML = cardHTML(m.b);
+    $('card-a').onclick = () => choose(m.a, m.b);
+    $('card-b').onclick = () => choose(m.b, m.a);
+  }
+
+  function cardHTML(c){
+    return `
+      <div class="outlet">${escapeHtml(c.outlet||'매체 미상')}</div>
+      <div class="headline">${escapeHtml(c.title)}</div>
+      ${c.quote ? `<div class="quote">&ldquo;${escapeHtml(c.quote)}&rdquo;</div>` : ''}
+      <div class="pick-tag">이 표현이 더 문제적입니다</div>
+    `;
+  }
+
+  async function choose(winner, loser){
+    sendVote(winner.id, loser.id);
+    winnersOfRound.push(winner);
+    matchIdx++;
+    const round = bracket[roundIdx];
+    if(matchIdx < round.length){
+      renderMatch();
+    } else {
+      if(winnersOfRound.length === 1){
+        showResult(winnersOfRound[0]);
+        return;
+      }
+      const nextRound = [];
+      for(let i=0;i<winnersOfRound.length;i+=2){
+        nextRound.push({a:winnersOfRound[i], b:winnersOfRound[i+1]});
+      }
+      bracket.push(nextRound);
+      roundIdx++; matchIdx = 0; winnersOfRound = [];
+      renderMatch();
+    }
+  }
+
+  function sendVote(winnerId, loserId){
+    // text/plain 으로 보내야 브라우저가 사전 확인(preflight) 요청을 보내지 않아 GAS와 잘 동작합니다.
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'vote', winnerId, loserId })
+    }).catch(e => console.error('투표 기록 실패', e));
+  }
+
+  function showResult(c){
+    show('result');
+    $('result-card').innerHTML = `
+      <div class="outlet">${escapeHtml(c.outlet||'매체 미상')}</div>
+      <h2>${escapeHtml(c.title)}</h2>
+      ${c.quote ? `<div class="quote">&ldquo;${escapeHtml(c.quote)}&rdquo;</div>` : ''}
+      ${c.description ? `<div class="desc">${escapeHtml(c.description)}</div>` : ''}
+      ${c.sourceUrl ? `<a class="source" href="${escapeAttr(c.sourceUrl)}" target="_blank" rel="noopener">원문 보기 ↗</a>` : ''}
+    `;
+  }
+
+  async function renderStats(){
+    show('stats');
+    let stats = {};
+    try{
+      const res = await fetch(GAS_URL + '?action=data');
+      const json = await res.json();
+      stats = json.stats || {};
+      if(json.cases) cases = json.cases; // 최신 사례 목록으로 동기화
+    }catch(e){ stats = {}; }
+
+    const rows = cases.map(c=>{
+      const s = stats[c.id] || {appearances:0, wins:0};
+      const rate = s.appearances ? Math.round((s.wins/s.appearances)*100) : 0;
+      return {c, ...s, rate};
+    }).filter(r=>r.appearances>0).sort((a,b)=> b.rate - a.rate || b.wins - a.wins);
+
+    if(rows.length===0){
+      $('stats-list').innerHTML = `<div class="empty-note">아직 쌓인 투표가 없습니다. 토너먼트에 참여해 첫 기록을 남겨보세요.</div>`;
+      return;
+    }
+    $('stats-list').innerHTML = rows.map((r,i)=>`
+      <div class="stats-row">
+        <div class="stats-rank">${i+1}</div>
+        <div class="stats-info">
+          <div class="title">${escapeHtml(r.c.title)} <span style="color:var(--ink-soft); font-weight:400;">— ${escapeHtml(r.c.outlet||'')}</span></div>
+          <div class="meta">${r.wins}승 / ${r.appearances}회 등장 · 지목률 ${r.rate}%</div>
+          <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${r.rate}%"></div></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  // ---------- consent form ----------
+  function checkConsentReady(){
+    const ready = $('c-name').value.trim() && $('c-phone').value.trim() && $('c-address').value.trim() && $('c-consent').checked;
+    $('consent-submit').disabled = !ready;
+  }
+  ['c-name','c-phone','c-address'].forEach(id=>{
+    $(id).addEventListener('input', checkConsentReady);
+  });
+  $('c-consent').addEventListener('change', checkConsentReady);
+
+  async function submitConsent(){
+    const data = {
+      name: $('c-name').value.trim(),
+      phone: $('c-phone').value.trim(),
+      address: $('c-address').value.trim(),
+      consent: $('c-consent').checked
+    };
+    $('consent-submit').disabled = true;
+    $('consent-submit').textContent = '처리 중…';
+    try{
+      await fetch(GAS_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'register', ...data })
+      });
+    }catch(e){
+      console.error('참가자 등록 실패', e);
+    }
+    $('consent-submit').textContent = '동의하고 시작하기';
+    startTournament();
+  }
+
+  // ---------- wiring ----------
+  $('start-btn').onclick = () => { show('consent'); checkConsentReady(); };
+  $('consent-cancel').onclick = () => show('home');
+  $('consent-submit').onclick = submitConsent;
+  $('restart-btn').onclick = () => { show('home'); renderHome(); };
+  $('stats-btn-home').onclick = renderStats;
+  $('to-stats-btn').onclick = renderStats;
+  $('nav-stats').onclick = renderStats;
+  $('nav-home').onclick = () => { show('home'); renderHome(); };
+
+  loadData();
+  show('home');
+})();
+</script>
+</body>
+</html>
