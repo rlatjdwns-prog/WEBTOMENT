@@ -18,7 +18,7 @@
       repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px),
       var(--paper);
     color:var(--ink); font-family:'Pretendard', -apple-system, sans-serif;
-    line-height:1.55; min-height:100vh; padding-bottom:60px;
+    line-height:1.6; min-height:100vh; padding-bottom:60px;
   }
   .wrap{max-width:720px; margin:0 auto; padding:0 20px;}
   header.top{
@@ -44,7 +44,7 @@
     line-height:1.28; letter-spacing:-0.01em; margin-bottom:18px;
   }
   .hero h1 .strike{color:var(--red-dark);}
-  .hero p.lede{font-size:16px; color:var(--ink-soft); max-width:52ch; margin-bottom:26px;}
+  .hero p.lede{font-size:16px; color:var(--ink-soft); max-width:54ch; margin-bottom:26px;}
   .stat-line{font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--ink-soft); margin-bottom:22px;}
   .stat-line b{color:var(--ink); font-weight:600;}
   .cta-row{display:flex; gap:12px; flex-wrap:wrap;}
@@ -75,41 +75,65 @@
   .consent-check input{width:auto; margin-top:3px;}
   .form-note{font-size:12px; color:var(--ink-soft); margin-top:10px;}
 
-  .stage-bar{display:flex; align-items:center; justify-content:space-between; margin:0 0 26px; padding-top:26px; border-top:1px solid var(--line);}
-  .stage-name{font-family:'Noto Serif KR', serif; font-weight:700; font-size:20px;}
-  .stage-count{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);}
-  .progress-track{height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-bottom:34px;}
+  /* quiz progress */
+  .stage-bar{display:flex; align-items:center; justify-content:space-between; margin:0 0 10px; padding-top:26px; border-top:1px solid var(--line);}
+  .stage-name{font-family:'Noto Serif KR', serif; font-weight:700; font-size:19px;}
+  .stage-count{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); text-align:right;}
+  .progress-track{height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-bottom:22px;}
   .progress-fill{height:100%; background:var(--red); transition:width .3s ease;}
-  .matchup{display:flex; flex-direction:column; gap:0; position:relative;}
-  .vs-mark{
-    align-self:center; width:46px; height:46px; border-radius:50%; border:2px solid var(--red); color:var(--red);
-    display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-weight:600;
-    font-size:13px; background:var(--paper); margin:-16px auto; z-index:2; transform:rotate(-6deg);
+  .instr-line{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); margin-bottom:20px;}
+
+  /* article card */
+  .article-card{background:var(--white); border:1px solid var(--line); box-shadow:0 3px 0 rgba(27,27,30,0.06); padding:30px 26px; margin-bottom:20px;}
+  .article-card .outlet{font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; color:var(--navy); text-transform:uppercase; margin-bottom:12px;}
+  .article-card .headline{
+    font-family:'Noto Serif KR', serif; font-weight:800; font-size:22px; line-height:1.42; margin-bottom:18px;
   }
-  .clip{
-    background:var(--white); border:1px solid var(--line); box-shadow:0 3px 0 rgba(27,27,30,0.06);
-    padding:26px 24px 22px; cursor:pointer; text-align:left; position:relative; transition:transform .12s ease, box-shadow .12s ease;
+  .article-card .body-text .para{font-size:15px; margin-bottom:14px; line-height:1.75;}
+  .wrong-target{cursor:pointer; border-radius:2px; transition:background .1s ease;}
+  .wrong-target:hover{background:rgba(36,51,73,0.08);}
+  .wrong-target.wrong-flash{background:rgba(183,57,46,0.16); animation:shake .35s ease;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-3px);}
+    75%{transform:translateX(3px);}
   }
-  .clip:hover{transform:translateY(-2px); box-shadow:0 6px 14px rgba(27,27,30,0.10);}
-  .clip:active{transform:translateY(0px);}
-  .clip .outlet{font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; color:var(--navy); text-transform:uppercase; margin-bottom:10px;}
-  .clip .headline{font-family:'Noto Serif KR', serif; font-weight:700; font-size:19px; line-height:1.4; margin-bottom:10px;}
-  .clip .quote{font-size:14px; color:var(--ink-soft); border-left:2px solid var(--line); padding-left:12px; margin-top:8px;}
-  .clip .pick-tag{margin-top:16px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--red); letter-spacing:0.06em;}
-  .clip .pick-tag::after{content:" →";}
-  .question-line{text-align:center; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); margin:18px 0 22px;}
-  .final-stamp{text-align:center; padding:30px 20px 10px;}
+  .problem-target{cursor:pointer; border-radius:2px; transition:background .1s ease;}
+  .problem-target:hover{background:rgba(183,57,46,0.10);}
+  .problem-target.found{
+    cursor:default;
+    text-decoration: underline wavy var(--red);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+    background: rgba(240,195,78,0.35);
+    font-weight:600;
+    box-shadow: 0 0 0 2px rgba(183,57,46,0.35);
+    padding:0 2px;
+  }
+  .explain-note{
+    margin-top:8px; padding:10px 14px; background:var(--paper-2);
+    border-left:3px solid var(--red); font-size:13.5px; color:var(--ink);
+    display:flex; gap:8px; align-items:flex-start;
+  }
+  .explain-note .mark{color:var(--red); font-weight:700; flex-shrink:0;}
+  .article-card a.source{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--navy); text-decoration:underline; display:inline-block; margin-top:10px;}
+
+  .complete-banner{
+    text-align:center; margin:0 0 18px;
+  }
   .stamp{
     display:inline-block; border:3px solid var(--red); color:var(--red); font-family:'IBM Plex Mono', monospace;
-    font-weight:700; font-size:13px; letter-spacing:0.14em; padding:8px 16px; transform:rotate(-4deg); border-radius:4px; margin-bottom:22px;
+    font-weight:700; font-size:13px; letter-spacing:0.14em; padding:8px 16px; transform:rotate(-4deg); border-radius:4px;
   }
-  .result-card{background:var(--white); border:1px solid var(--line); padding:30px 26px; box-shadow:0 3px 0 rgba(27,27,30,0.06); margin-bottom:24px;}
-  .result-card .outlet{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--navy); letter-spacing:0.08em; margin-bottom:10px;}
-  .result-card h2{font-family:'Noto Serif KR', serif; font-size:24px; font-weight:800; margin-bottom:14px; line-height:1.4;}
-  .result-card .quote{font-size:14px; color:var(--ink-soft); border-left:2px solid var(--red); padding-left:14px; margin-bottom:16px;}
-  .result-card .desc{font-size:14.5px; color:var(--ink); margin-bottom:14px;}
-  .result-card a.source{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--navy); text-decoration:underline;}
   .end-actions{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:40px;}
+
+  /* final summary */
+  .summary-card{background:var(--white); border:1px solid var(--line); padding:30px 26px; box-shadow:0 3px 0 rgba(27,27,30,0.06); margin-bottom:24px; text-align:center;}
+  .summary-card .big-num{font-family:'Noto Serif KR', serif; font-weight:900; font-size:44px; color:var(--red);}
+  .summary-card .big-num span{font-size:20px; color:var(--ink-soft); font-weight:500;}
+  .summary-card .msg{font-size:14.5px; color:var(--ink-soft); margin-top:10px;}
+
+  /* stats */
   .stats-row{display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--line);}
   .stats-rank{font-family:'Noto Serif KR', serif; font-weight:900; font-size:22px; color:var(--red); width:34px; flex-shrink:0;}
   .stats-info{flex:1;}
@@ -119,7 +143,49 @@
   .stats-bar-fill{height:100%; background:var(--red);}
   .empty-note{color:var(--ink-soft); font-size:14px; padding:30px 0; text-align:center;}
   .hidden{display:none !important;}
-  @media(max-width:600px){ .hero{padding-top:30px;} .clip{padding:20px 18px 18px;} }
+
+  /* admin */
+  .admin-gear{
+    position:fixed; bottom:18px; right:18px; width:38px; height:38px;
+    border-radius:50%; background:var(--ink); color:var(--paper);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-size:16px; opacity:0.35; z-index:50; border:none;
+  }
+  .admin-gear:hover{opacity:1;}
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(27,27,30,0.55); z-index:100;
+    display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto;
+  }
+  .modal{
+    background:var(--paper); border:2px solid var(--ink); max-width:640px; width:100%;
+    padding:26px; margin-bottom:40px;
+  }
+  .modal h3{font-family:'Noto Serif KR', serif; font-size:20px; margin-bottom:16px;}
+  .modal label{display:block; font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); margin:12px 0 4px;}
+  .modal input, .modal textarea{
+    width:100%; padding:10px; border:1px solid var(--line); background:var(--white);
+    font-family:'Pretendard', sans-serif; font-size:14px; border-radius:var(--radius);
+  }
+  .modal textarea{min-height:90px; resize:vertical; font-family:'IBM Plex Mono', monospace; font-size:13px;}
+  .mark-helper{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; background:none;
+    border:1px solid var(--red); color:var(--red); padding:5px 10px; cursor:pointer; margin-top:6px; border-radius:var(--radius);
+  }
+  .admin-case-row{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:10px 0; border-bottom:1px solid var(--line); gap:10px;
+  }
+  .admin-case-row .t{font-size:13px; flex:1;}
+  .admin-case-row .row-btns{display:flex; gap:6px; flex-shrink:0;}
+  .admin-case-row button{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; background:none;
+    border:1px solid var(--ink-soft); color:var(--ink-soft); padding:4px 8px; cursor:pointer;
+  }
+  .admin-case-row button.danger{border-color:var(--red); color:var(--red);}
+  .modal-close{float:right; cursor:pointer; font-family:'IBM Plex Mono', monospace; font-size:12px; background:none; border:none; color:var(--ink-soft);}
+  .modal-actions{display:flex; gap:10px; margin-top:18px;}
+  .admin-error{color:var(--red-dark); font-size:12.5px; margin-top:8px;}
+  @media(max-width:600px){ .hero{padding-top:30px;} .article-card{padding:22px 18px;} }
 </style>
 </head>
 <body>
@@ -137,10 +203,10 @@
   <!-- ============ HOME ============ -->
   <section id="view-home">
     <div class="hero">
-      <div class="eyebrow">언론·미디어 왜곡 토너먼트</div>
+      <div class="eyebrow">언론·미디어 왜곡 찾기</div>
       <h1>그 보도, <span class="strike">정정</span>이 필요합니다</h1>
-      <p class="lede">정신질환을 다룬 실제 보도 사례 두 개가 매번 무작위로 맞붙습니다. 더 편견을 부추기는 쪽을 직접 골라 최종 사례까지 가려보세요.</p>
-      <div class="stat-line" id="home-stat-line">사례 불러오는 중…</div>
+      <p class="lede">실제 보도 기사를 그대로 보여드립니다. 정신질환에 대한 편견을 부추기는 표현이 어디에 숨어있는지 직접 짚어보세요. 정답을 클릭하면 왜 문제인지 바로 알려드립니다.</p>
+      <div class="stat-line" id="home-stat-line">기사 불러오는 중…</div>
       <div class="cta-row">
         <button class="btn btn-primary" id="start-btn" disabled>참여하기</button>
         <button class="btn btn-ghost" id="stats-btn-home">누적 통계 보기</button>
@@ -180,32 +246,46 @@
         <button class="btn btn-primary" id="consent-submit" disabled>동의하고 시작하기</button>
         <button class="btn btn-ghost" id="consent-cancel">취소</button>
       </div>
-      <div class="form-note" id="consent-error"></div>
     </div>
   </section>
 
-  <!-- ============ MATCH ============ -->
-  <section id="view-match" class="hidden">
+  <!-- ============ QUIZ ============ -->
+  <section id="view-quiz" class="hidden">
     <div class="stage-bar">
-      <div class="stage-name" id="stage-name">초교</div>
-      <div class="stage-count" id="stage-count">1 / 8</div>
+      <div class="stage-name" id="stage-name">기사 1 / 5</div>
+      <div class="stage-count" id="stage-count">발견 0 / 0 · 오답 0회</div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    <div class="question-line" id="question-line">어떤 보도가 정신질환에 대한 편견을 더 부추길까요?</div>
-    <div class="matchup">
-      <div class="clip" id="card-a"></div>
-      <div class="vs-mark">VS</div>
-      <div class="clip" id="card-b"></div>
+    <div class="instr-line">편견을 부추기는 표현이라고 생각되는 부분을 눌러보세요.</div>
+
+    <div class="article-card">
+      <div class="outlet" id="q-outlet"></div>
+      <div class="headline" id="q-headline"></div>
+      <div class="body-text" id="q-body"></div>
+      <a class="source hidden" id="q-source" target="_blank" rel="noopener">원문 보기 ↗</a>
+    </div>
+
+    <div class="complete-banner hidden" id="complete-banner">
+      <div class="stamp">모두 찾았습니다</div>
+    </div>
+    <div class="end-actions">
+      <button class="btn btn-primary hidden" id="next-btn">다음 기사</button>
     </div>
   </section>
 
-  <!-- ============ RESULT ============ -->
-  <section id="view-result" class="hidden">
-    <div class="final-stamp"><div class="stamp">최종 확인 완료</div></div>
-    <div class="result-card" id="result-card"></div>
+  <!-- ============ FINAL SUMMARY ============ -->
+  <section id="view-summary" class="hidden">
+    <div class="hero" style="padding-top:36px;">
+      <div class="eyebrow">참여 완료</div>
+      <h1 style="font-size:clamp(26px,5vw,34px);">오늘 이만큼 찾으셨어요</h1>
+    </div>
+    <div class="summary-card">
+      <div class="big-num" id="summary-num">0 <span>/ 0</span></div>
+      <div class="msg">전체 기사에서 발견한 왜곡 표현 수 (오답 <span id="summary-wrong">0</span>회)</div>
+    </div>
     <div class="end-actions">
       <button class="btn btn-primary" id="restart-btn">다시 하기</button>
-      <button class="btn btn-ghost" id="to-stats-btn">누적 통계 보기</button>
+      <button class="btn btn-ghost" id="summary-stats-btn">누적 통계 보기</button>
     </div>
   </section>
 
@@ -213,12 +293,52 @@
   <section id="view-stats" class="hidden">
     <div class="hero" style="padding-top:36px;">
       <div class="eyebrow">누적 기록</div>
-      <h1 style="font-size:clamp(26px,5vw,34px);">가장 많이 지목된 왜곡</h1>
-      <p class="lede">참여자들이 라운드마다 고른 선택이 쌓인 결과입니다.</p>
+      <h1 style="font-size:clamp(26px,5vw,34px);">가장 많이 놓친 왜곡 표현</h1>
+      <p class="lede">발견율이 낮을수록, 그만큼 사람들 눈에 잘 띄지 않을 만큼 자연스럽게 스며든 왜곡이라는 뜻입니다.</p>
     </div>
     <div class="stats-list" id="stats-list"></div>
   </section>
+</div>
 
+<button class="admin-gear" id="admin-gear" title="관리자">⚙</button>
+
+<!-- ============ ADMIN MODAL ============ -->
+<div class="modal-bg hidden" id="admin-modal-bg">
+  <div class="modal">
+    <button class="modal-close" id="admin-close">닫기 ✕</button>
+    <h3>관리자 — 기사 관리</h3>
+
+    <div id="admin-locked">
+      <label>관리자 비밀번호</label>
+      <input type="password" id="admin-pass" placeholder="비밀번호 입력">
+      <div class="modal-actions"><button class="btn btn-primary" id="admin-unlock">확인</button></div>
+      <div class="admin-error" id="admin-lock-error"></div>
+    </div>
+
+    <div id="admin-unlocked" class="hidden">
+      <div id="admin-case-list"></div>
+
+      <h3 style="margin-top:22px;" id="admin-form-title">새 기사 추가</h3>
+      <label>언론사 / 매체</label>
+      <input type="text" id="f-outlet" placeholder="예: OO일보">
+      <label>헤드라인 — 문제 표현은 [[문구|설명]] 형식으로 감싸기</label>
+      <textarea id="f-headline" placeholder="예: 구로구 모친 살해 [[조현병 20대|질환명과 범죄를 인과관계처럼...]], 1심 징역 12년"></textarea>
+      <button class="mark-helper" data-target="f-headline">선택 영역을 문제 표현으로 표시</button>
+
+      <label>본문 — 문단 구분은 줄바꿈(Enter), 문제 표현은 [[문구|설명]] 형식</label>
+      <textarea id="f-body" style="min-height:160px;" placeholder="문단1...&#10;&#10;문단2..."></textarea>
+      <button class="mark-helper" data-target="f-body">선택 영역을 문제 표현으로 표시</button>
+
+      <label>출처 링크 (선택)</label>
+      <input type="text" id="f-source" placeholder="https://...">
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="f-submit">기사 추가</button>
+        <button class="btn btn-ghost hidden" id="f-cancel-edit">수정 취소</button>
+      </div>
+      <div class="admin-error" id="admin-form-error"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -226,51 +346,29 @@
   // ⬇️ Apps Script 배포 후 발급되는 웹 앱 URL로 반드시 교체하세요 (.../exec 로 끝남)
   const GAS_URL = "https://script.google.com/macros/s/여기에_배포_ID를_넣으세요/exec";
 
-  const MAX_BRACKET = 16;
-  const QUESTION_TEXT = "어떤 보도가 정신질환에 대한 편견을 더 부추길까요?";
-  const STAGE_NAMES = { 2:"최종 확인", 4:"삼교", 8:"재교", 16:"초교", 32:"교열" };
-
   let cases = [];
-  let bracket = [];
-  let roundIdx = 0;
-  let matchIdx = 0;
-  let winnersOfRound = [];
-  let totalRounds = 0;
+  let queue = [];
+  let queueIdx = 0;
+  let currentCase = null;
+  let totalProblems = 0;
+  let foundIds = new Set();
+  let wrongClicks = 0;
+  let sessionFound = 0;
+  let sessionTotal = 0;
+  let sessionWrong = 0;
 
   const $ = (id) => document.getElementById(id);
 
   function show(view){
-    ['home','consent','match','result','stats'].forEach(v=>{
+    ['home','consent','quiz','summary','stats'].forEach(v=>{
       $('view-'+v).classList.toggle('hidden', v!==view);
     });
   }
 
-  async function loadData(){
-    try{
-      const res = await fetch(GAS_URL + '?action=data');
-      const json = await res.json();
-      cases = json.cases || [];
-    }catch(e){
-      cases = [];
-      console.error('데이터 로드 실패 — GAS_URL 설정을 확인하세요.', e);
-    }
-    renderHome();
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
-
-  function renderHome(){
-    const n = cases.length;
-    $('home-stat-line').innerHTML = n >= 2
-      ? `현재 등록된 사례 <b>${n}개</b>. 이번 판은 <b>${bracketSizeFor(n)}강</b>으로 진행됩니다.`
-      : `등록된 사례가 부족합니다 (${n}개). 구글시트 "사례" 탭에 최소 2개 이상 입력해 주세요.`;
-    $('start-btn').disabled = n < 2;
-  }
-
-  function bracketSizeFor(n){
-    let size = 2;
-    while(size*2 <= n && size*2 <= MAX_BRACKET) size *= 2;
-    return size;
-  }
-
+  function escapeAttr(s){ return escapeHtml(s); }
   function shuffle(arr){
     const a = arr.slice();
     for(let i=a.length-1;i>0;i--){
@@ -280,96 +378,148 @@
     return a;
   }
 
-  function startTournament(){
-    const size = bracketSizeFor(cases.length);
-    const pool = shuffle(cases).slice(0, size);
-    const firstRound = [];
-    for(let i=0;i<pool.length;i+=2){
-      firstRound.push({a:pool[i], b:pool[i+1]});
+  async function loadData(silent){
+    try{
+      const res = await fetch(GAS_URL + '?action=data');
+      const json = await res.json();
+      cases = json.cases || [];
+    }catch(e){
+      cases = [];
+      console.error('데이터 로드 실패 — GAS_URL 설정을 확인하세요.', e);
     }
-    bracket = [firstRound];
-    roundIdx = 0; matchIdx = 0; winnersOfRound = [];
-    totalRounds = Math.log2(size);
-    show('match');
-    renderMatch();
+    if(!silent) renderHome();
   }
 
-  function currentStageName(){
-    const remaining = totalRounds - roundIdx;
-    const sizeAtThisRound = Math.pow(2, remaining);
-    return STAGE_NAMES[sizeAtThisRound] || (sizeAtThisRound+"강");
+  function renderHome(){
+    const n = cases.length;
+    $('home-stat-line').innerHTML = n >= 1
+      ? `현재 등록된 기사 <b>${n}개</b>.`
+      : `등록된 기사가 없습니다. 구글시트 "사례" 탭에 기사를 입력해 주세요.`;
+    $('start-btn').disabled = n < 1;
   }
 
-  function bracket_total_matches(){
-    const size = Math.pow(2, totalRounds);
-    return size - 1;
+  // ---------- marker parsing ----------
+  // [[문구|설명]] 를 클릭 가능한 정답 지점으로, 나머지는 단어 단위 오답 클릭 지점으로 렌더링
+  function renderPlain(str){
+    return str.split(/(\s+)/).map(chunk=>{
+      if(chunk==='' || /^\s+$/.test(chunk)) return chunk;
+      return `<span class="wrong-target">${escapeHtml(chunk)}</span>`;
+    }).join('');
   }
 
-  function renderMatch(){
-    const round = bracket[roundIdx];
-    const m = round[matchIdx];
-    $('stage-name').innerHTML = currentStageName();
-    $('stage-count').textContent = `${matchIdx+1} / ${round.length}`;
-    $('question-line').textContent = QUESTION_TEXT;
-
-    const doneMatches = bracket.slice(0, roundIdx).reduce((s,r)=>s+r.length,0) + matchIdx;
-    $('progress-fill').style.width = Math.round((doneMatches/bracket_total_matches())*100)+'%';
-
-    $('card-a').innerHTML = cardHTML(m.a);
-    $('card-b').innerHTML = cardHTML(m.b);
-    $('card-a').onclick = () => choose(m.a, m.b);
-    $('card-b').onclick = () => choose(m.b, m.a);
+  function parseAndRender(text, idCounter){
+    const regex = /\[\[(.*?)\|(.*?)\]\]/g;
+    let lastIndex = 0, html = '', m;
+    while((m = regex.exec(text))){
+      html += renderPlain(text.slice(lastIndex, m.index));
+      const id = 'p' + (idCounter.n++);
+      html += `<span class="problem-target" data-id="${id}" data-explanation="${escapeAttr(m[2])}">${escapeHtml(m[1])}</span>`;
+      lastIndex = regex.lastIndex;
+    }
+    html += renderPlain(text.slice(lastIndex));
+    return html;
   }
 
-  function cardHTML(c){
-    return `
-      <div class="outlet">${escapeHtml(c.outlet||'매체 미상')}</div>
-      <div class="headline">${escapeHtml(c.title)}</div>
-      ${c.quote ? `<div class="quote">&ldquo;${escapeHtml(c.quote)}&rdquo;</div>` : ''}
-      <div class="pick-tag">이 표현이 더 문제적입니다</div>
-    `;
+  function startSession(){
+    queue = shuffle(cases);
+    queueIdx = 0;
+    sessionFound = 0; sessionTotal = 0; sessionWrong = 0;
+    show('quiz');
+    loadCase(queue[queueIdx]);
   }
 
-  async function choose(winner, loser){
-    sendVote(winner.id, loser.id);
-    winnersOfRound.push(winner);
-    matchIdx++;
-    const round = bracket[roundIdx];
-    if(matchIdx < round.length){
-      renderMatch();
+  function loadCase(c){
+    currentCase = c;
+    foundIds = new Set();
+    wrongClicks = 0;
+    const idCounter = { n: 0 };
+
+    $('q-outlet').textContent = c.outlet || '매체 미상';
+    $('q-headline').innerHTML = parseAndRender(c.headline || '', idCounter);
+    const paras = (c.body || '').split(/\n+/).filter(p => p.trim());
+    $('q-body').innerHTML = paras.map(p => `<div class="para">${parseAndRender(p, idCounter)}</div>`).join('');
+
+    if(c.sourceUrl){
+      $('q-source').href = c.sourceUrl;
+      $('q-source').classList.remove('hidden');
     } else {
-      if(winnersOfRound.length === 1){
-        showResult(winnersOfRound[0]);
-        return;
-      }
-      const nextRound = [];
-      for(let i=0;i<winnersOfRound.length;i+=2){
-        nextRound.push({a:winnersOfRound[i], b:winnersOfRound[i+1]});
-      }
-      bracket.push(nextRound);
-      roundIdx++; matchIdx = 0; winnersOfRound = [];
-      renderMatch();
+      $('q-source').classList.add('hidden');
+    }
+
+    totalProblems = idCounter.n;
+    $('stage-name').textContent = `기사 ${queueIdx+1} / ${queue.length}`;
+    $('complete-banner').classList.add('hidden');
+    $('next-btn').classList.add('hidden');
+    updateProgress();
+  }
+
+  function updateProgress(){
+    $('stage-count').textContent = `발견 ${foundIds.size} / ${totalProblems} · 오답 ${wrongClicks}회`;
+    $('progress-fill').style.width = totalProblems ? Math.round((foundIds.size/totalProblems)*100)+'%' : '0%';
+  }
+
+  document.getElementById('q-body').addEventListener('click', handleArticleClick);
+  document.getElementById('q-headline').addEventListener('click', handleArticleClick);
+
+  function handleArticleClick(e){
+    const target = e.target.closest('.problem-target, .wrong-target');
+    if(!target) return;
+
+    if(target.classList.contains('problem-target')){
+      if(target.classList.contains('found')) return;
+      target.classList.add('found');
+      foundIds.add(target.dataset.id);
+      const note = document.createElement('div');
+      note.className = 'explain-note';
+      note.innerHTML = `<span class="mark">✓</span><span>${escapeHtml(target.dataset.explanation)}</span>`;
+      const container = target.closest('.para') || target.closest('.headline');
+      container.insertAdjacentElement('afterend', note);
+      updateProgress();
+      if(foundIds.size === totalProblems) onArticleComplete();
+    } else {
+      wrongClicks++;
+      target.classList.add('wrong-flash');
+      setTimeout(()=>target.classList.remove('wrong-flash'), 350);
+      updateProgress();
     }
   }
 
-  function sendVote(winnerId, loserId){
-    // text/plain 으로 보내야 브라우저가 사전 확인(preflight) 요청을 보내지 않아 GAS와 잘 동작합니다.
+  function onArticleComplete(){
+    $('complete-banner').classList.remove('hidden');
+    $('next-btn').classList.remove('hidden');
+    sessionFound += foundIds.size;
+    sessionTotal += totalProblems;
+    sessionWrong += wrongClicks;
+    sendCompletion();
+  }
+
+  function sendCompletion(){
     fetch(GAS_URL, {
       method: 'POST',
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'vote', winnerId, loserId })
-    }).catch(e => console.error('투표 기록 실패', e));
+      body: JSON.stringify({
+        action: 'complete',
+        id: currentCase.id,
+        foundCount: foundIds.size,
+        totalProblems: totalProblems,
+        wrongClicks: wrongClicks
+      })
+    }).catch(e => console.error('결과 기록 실패', e));
   }
 
-  function showResult(c){
-    show('result');
-    $('result-card').innerHTML = `
-      <div class="outlet">${escapeHtml(c.outlet||'매체 미상')}</div>
-      <h2>${escapeHtml(c.title)}</h2>
-      ${c.quote ? `<div class="quote">&ldquo;${escapeHtml(c.quote)}&rdquo;</div>` : ''}
-      ${c.description ? `<div class="desc">${escapeHtml(c.description)}</div>` : ''}
-      ${c.sourceUrl ? `<a class="source" href="${escapeAttr(c.sourceUrl)}" target="_blank" rel="noopener">원문 보기 ↗</a>` : ''}
-    `;
+  function nextArticle(){
+    queueIdx++;
+    if(queueIdx < queue.length){
+      loadCase(queue[queueIdx]);
+    } else {
+      showSummary();
+    }
+  }
+
+  function showSummary(){
+    show('summary');
+    $('summary-num').innerHTML = `${sessionFound} <span>/ ${sessionTotal}</span>`;
+    $('summary-wrong').textContent = sessionWrong;
   }
 
   async function renderStats(){
@@ -379,35 +529,31 @@
       const res = await fetch(GAS_URL + '?action=data');
       const json = await res.json();
       stats = json.stats || {};
-      if(json.cases) cases = json.cases; // 최신 사례 목록으로 동기화
+      if(json.cases) cases = json.cases;
     }catch(e){ stats = {}; }
 
     const rows = cases.map(c=>{
-      const s = stats[c.id] || {appearances:0, wins:0};
-      const rate = s.appearances ? Math.round((s.wins/s.appearances)*100) : 0;
-      return {c, ...s, rate};
-    }).filter(r=>r.appearances>0).sort((a,b)=> b.rate - a.rate || b.wins - a.wins);
+      const s = stats[c.id] || {completions:0, foundSum:0, problemSum:0, wrongSum:0};
+      const findRate = s.problemSum ? Math.round((s.foundSum/s.problemSum)*100) : null;
+      const avgWrong = s.completions ? (s.wrongSum/s.completions).toFixed(1) : null;
+      return {c, ...s, findRate, avgWrong};
+    }).filter(r=>r.completions>0).sort((a,b)=> a.findRate - b.findRate);
 
     if(rows.length===0){
-      $('stats-list').innerHTML = `<div class="empty-note">아직 쌓인 투표가 없습니다. 토너먼트에 참여해 첫 기록을 남겨보세요.</div>`;
+      $('stats-list').innerHTML = `<div class="empty-note">아직 쌓인 참여 기록이 없습니다.</div>`;
       return;
     }
     $('stats-list').innerHTML = rows.map((r,i)=>`
       <div class="stats-row">
         <div class="stats-rank">${i+1}</div>
         <div class="stats-info">
-          <div class="title">${escapeHtml(r.c.title)} <span style="color:var(--ink-soft); font-weight:400;">— ${escapeHtml(r.c.outlet||'')}</span></div>
-          <div class="meta">${r.wins}승 / ${r.appearances}회 등장 · 지목률 ${r.rate}%</div>
-          <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${r.rate}%"></div></div>
+          <div class="title">${escapeHtml(r.c.headline.replace(/\[\[(.*?)\|.*?\]\]/g, '$1'))} <span style="color:var(--ink-soft); font-weight:400;">— ${escapeHtml(r.c.outlet||'')}</span></div>
+          <div class="meta">발견율 ${r.findRate}% · 평균 오답 ${r.avgWrong}회 · ${r.completions}명 참여</div>
+          <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${r.findRate}%"></div></div>
         </div>
       </div>
     `).join('');
   }
-
-  function escapeHtml(s){
-    return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-  function escapeAttr(s){ return escapeHtml(s); }
 
   // ---------- consent form ----------
   function checkConsentReady(){
@@ -438,16 +584,160 @@
       console.error('참가자 등록 실패', e);
     }
     $('consent-submit').textContent = '동의하고 시작하기';
-    startTournament();
+    startSession();
   }
+
+  // ---------- admin ----------
+  let adminToken = null;
+  let editingCaseId = null;
+
+  function renderAdminList(){
+    $('admin-case-list').innerHTML = cases.length ? cases.map(c=>`
+      <div class="admin-case-row">
+        <div class="t">${escapeHtml(c.outlet||'')} — ${escapeHtml(c.headline.replace(/\[\[(.*?)\|.*?\]\]/g,'$1'))}</div>
+        <div class="row-btns">
+          <button data-edit="${c.id}">수정</button>
+          <button class="danger" data-del="${c.id}">삭제</button>
+        </div>
+      </div>
+    `).join('') : `<div class="empty-note">등록된 기사가 없습니다.</div>`;
+
+    $('admin-case-list').querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.onclick = () => loadIntoForm(btn.getAttribute('data-edit'));
+    });
+    $('admin-case-list').querySelectorAll('[data-del]').forEach(btn=>{
+      btn.onclick = async () => {
+        if(!confirm('이 기사를 삭제할까요?')) return;
+        const res = await adminRequest('admin_delete', { id: btn.getAttribute('data-del') });
+        if(res && res.ok){
+          cases = cases.filter(c=>c.id !== btn.getAttribute('data-del'));
+          renderAdminList();
+          renderHome();
+        } else {
+          alert('삭제에 실패했습니다.');
+        }
+      };
+    });
+  }
+
+  function loadIntoForm(id){
+    const c = cases.find(c=>c.id===id);
+    if(!c) return;
+    editingCaseId = id;
+    $('f-outlet').value = c.outlet||'';
+    $('f-headline').value = c.headline||'';
+    $('f-body').value = c.body||'';
+    $('f-source').value = c.sourceUrl||'';
+    $('admin-form-title').textContent = '기사 수정';
+    $('f-submit').textContent = '수정 저장';
+    $('f-cancel-edit').classList.remove('hidden');
+    window.scrollTo({top:0});
+  }
+
+  function clearForm(){
+    editingCaseId = null;
+    ['f-outlet','f-headline','f-body','f-source'].forEach(id=>$(id).value='');
+    $('admin-form-title').textContent = '새 기사 추가';
+    $('f-submit').textContent = '기사 추가';
+    $('f-cancel-edit').classList.add('hidden');
+    $('admin-form-error').textContent = '';
+  }
+
+  function wireMarkHelpers(){
+    document.querySelectorAll('.mark-helper').forEach(btn=>{
+      btn.onclick = () => {
+        const ta = $(btn.getAttribute('data-target'));
+        const start = ta.selectionStart, end = ta.selectionEnd;
+        const selected = ta.value.slice(start, end);
+        if(!selected){ alert('먼저 문제라고 표시할 문구를 마우스로 드래그해서 선택해 주세요.'); return; }
+        const explanation = prompt('이 표현이 왜 문제인지 설명을 입력하세요:', '');
+        if(explanation === null) return;
+        const replaced = `[[${selected}|${explanation}]]`;
+        ta.value = ta.value.slice(0,start) + replaced + ta.value.slice(end);
+      };
+    });
+  }
+
+  async function adminRequest(action, data){
+    try{
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action, token: adminToken, ...data })
+      });
+      return await res.json();
+    }catch(e){
+      console.error('관리자 요청 실패', e);
+      return null;
+    }
+  }
+
+  async function submitCaseForm(){
+    const data = {
+      outlet: $('f-outlet').value.trim(),
+      headline: $('f-headline').value.trim(),
+      body: $('f-body').value.trim(),
+      sourceUrl: $('f-source').value.trim()
+    };
+    if(!data.headline){ $('admin-form-error').textContent = '헤드라인을 입력해 주세요.'; return; }
+
+    $('f-submit').disabled = true;
+    let res;
+    if(editingCaseId){
+      res = await adminRequest('admin_update', { id: editingCaseId, ...data });
+    } else {
+      res = await adminRequest('admin_add', data);
+    }
+    $('f-submit').disabled = false;
+
+    if(res && res.ok){
+      clearForm();
+      await loadData(true);
+      renderAdminList();
+    } else {
+      $('admin-form-error').textContent = '저장에 실패했습니다. 비밀번호가 만료되었을 수 있어요 — 다시 로그인해 주세요.';
+    }
+  }
+
+  $('admin-gear').onclick = () => {
+    $('admin-modal-bg').classList.remove('hidden');
+    $('admin-locked').classList.remove('hidden');
+    $('admin-unlocked').classList.add('hidden');
+    $('admin-pass').value='';
+    $('admin-lock-error').textContent = '';
+  };
+  $('admin-close').onclick = () => $('admin-modal-bg').classList.add('hidden');
+  $('admin-modal-bg').onclick = (e) => { if(e.target.id==='admin-modal-bg') $('admin-modal-bg').classList.add('hidden'); };
+  $('admin-unlock').onclick = async () => {
+    const pass = $('admin-pass').value;
+    const check = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'admin_check', token: pass })
+    }).then(r=>r.json()).catch(()=>({ok:false}));
+
+    if(check && check.ok){
+      adminToken = pass;
+      $('admin-locked').classList.add('hidden');
+      $('admin-unlocked').classList.remove('hidden');
+      clearForm();
+      wireMarkHelpers();
+      renderAdminList();
+    } else {
+      $('admin-lock-error').textContent = '비밀번호가 올바르지 않습니다.';
+    }
+  };
+  $('f-submit').onclick = submitCaseForm;
+  $('f-cancel-edit').onclick = clearForm;
 
   // ---------- wiring ----------
   $('start-btn').onclick = () => { show('consent'); checkConsentReady(); };
   $('consent-cancel').onclick = () => show('home');
   $('consent-submit').onclick = submitConsent;
+  $('next-btn').onclick = nextArticle;
   $('restart-btn').onclick = () => { show('home'); renderHome(); };
   $('stats-btn-home').onclick = renderStats;
-  $('to-stats-btn').onclick = renderStats;
+  $('summary-stats-btn').onclick = renderStats;
   $('nav-stats').onclick = renderStats;
   $('nav-home').onclick = () => { show('home'); renderHome(); };
 
