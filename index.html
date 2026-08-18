@@ -58,8 +58,20 @@
   .btn-primary:hover{background:var(--red-dark); border-color:var(--red-dark);}
   .btn-ghost{background:var(--surface); color:var(--ink); border-color:var(--line);}
   .btn-ghost:hover{border-color:var(--ink);}
-  .btn:disabled{opacity:0.35; cursor:not-allowed;}
-  .btn:disabled:hover{background:var(--surface); color:var(--ink);}
+  .btn:disabled{opacity:0.45; cursor:not-allowed; background:var(--surface-soft); color:var(--ink-soft); border-color:var(--line);}
+  .btn:disabled:hover{background:var(--surface-soft); color:var(--ink-soft);}
+  .btn-icon{margin-right:4px;}
+
+  #confirm-btn.btn-ready{
+    background:var(--red);
+    border-color:var(--red);
+    animation:ready-pulse 1.4s ease-in-out infinite;
+  }
+  #confirm-btn.btn-ready:hover{background:var(--red-dark); border-color:var(--red-dark);}
+  @keyframes ready-pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(163,45,45,0.35);}
+    50%{box-shadow:0 0 0 6px rgba(163,45,45,0);}
+  }
 
   /* consent form */
   .form-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-card); padding:28px 26px; margin-bottom:24px;}
@@ -287,8 +299,9 @@
       <a class="source hidden" id="q-source" target="_blank" rel="noopener">원문 보기 ↗</a>
     </div>
 
-    <div class="cta-row" style="margin-bottom:20px;">
-      <button class="btn btn-primary" id="confirm-btn" disabled>차별/편견 확인</button>
+    <div class="confirm-group">
+      <div class="confirm-caption" id="confirm-caption">먼저 표현을 선택하세요</div>
+      <button class="btn btn-primary" id="confirm-btn" disabled>선택 완료 · 채점하기</button>
     </div>
 
     <div class="complete-banner hidden" id="complete-banner">
@@ -383,7 +396,7 @@
 <script>
 (function(){
   // ⬇️ Apps Script 배포 후 발급되는 웹 앱 URL로 반드시 교체하세요 (.../exec 로 끝남)
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwPzLzEDbf-FY3d-poZtxq5xrSdklx2gNdT1VesNkLp9dX7rys04yj3N7JlVvSXyZWm/exec";
+  const GAS_URL = "https://script.google.com/macros/s/여기에_배포_ID를_넣으세요/exec";
 
   let cases = [];
   let queue = [];
@@ -398,6 +411,13 @@
   let participantPhone = '';
 
   const $ = (id) => document.getElementById(id);
+
+  // 모든 서버 요청은 GET 쿼리 파라미터로 통일 (Apps Script POST 리다이렉트 CORS 이슈 회피)
+  async function gasRequest(params){
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(GAS_URL + '?' + qs);
+    return res.json();
+  }
 
   function show(view){
     ['home','consent','quiz','summary','stats'].forEach(v=>{
@@ -500,8 +520,16 @@
   function updateSelectionUI(){
     $('stage-count').textContent = `선택 ${selectedSet.size} / ${totalProblems}`;
     $('progress-fill').style.width = totalProblems ? Math.round((selectedSet.size/totalProblems)*100)+'%' : '0%';
-    $('confirm-btn').textContent = `차별/편견 확인 (${selectedSet.size}/${totalProblems})`;
-    $('confirm-btn').disabled = selectedSet.size === 0;
+
+    if(selectedSet.size === 0){
+      $('confirm-btn').innerHTML = `<span class="btn-icon">☐</span> 먼저 부분을 선택하세요`;
+      $('confirm-btn').classList.remove('btn-ready');
+      $('confirm-btn').disabled = true;
+    } else {
+      $('confirm-btn').innerHTML = `<span class="btn-icon">✓</span> 선택 완료 — 채점하기 (${selectedSet.size}/${totalProblems})`;
+      $('confirm-btn').classList.add('btn-ready');
+      $('confirm-btn').disabled = false;
+    }
   }
 
   let selectedSet = new Set();
@@ -583,16 +611,12 @@
   }
 
   function sendCompletion(correctCount, wrongCount){
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({
-        action: 'complete',
-        id: currentCase.id,
-        foundCount: correctCount,
-        totalProblems: totalProblems,
-        wrongClicks: wrongCount
-      })
+    gasRequest({
+      action: 'complete',
+      id: currentCase.id,
+      foundCount: correctCount,
+      totalProblems: totalProblems,
+      wrongClicks: wrongCount
     }).catch(e => console.error('결과 기록 실패', e));
   }
 
@@ -618,26 +642,32 @@
     $('draw-title').textContent = '추첨 결과 확인 중…';
     $('draw-sub').textContent = '';
     try{
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action:'draw', phone: participantPhone })
-      }).then(r=>r.json());
+      const rawRes = await fetch(GAS_URL + '?' + new URLSearchParams({ action:'draw', phone: participantPhone }).toString());
+      const rawText = await rawRes.text();
+      let res;
+      try{
+        res = JSON.parse(rawText);
+      }catch(parseErr){
+        // 서버가 JSON이 아닌 응답(오류 페이지 등)을 준 경우 — 화면에 원인을 그대로 보여줌
+        $('draw-title').textContent = '추첨 결과를 확인하지 못했습니다. (디버그 정보)';
+        $('draw-sub').innerHTML = `상태 코드: ${rawRes.status}<br>응답 내용 앞부분:<br><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; word-break:break-all;">${escapeHtml(rawText.slice(0,300))}</span>`;
+        return;
+      }
 
       if(res && res.win){
         $('draw-title').textContent = '🎉 축하합니다, 당첨되셨습니다!';
         $('draw-sub').textContent = res.already ? '이전 참여 결과입니다. 안내드린 연락처로 곧 연락드리겠습니다.' : '등록하신 연락처로 곧 연락드리겠습니다.';
       } else if(res && res.error){
-        $('draw-title').textContent = '추첨 결과를 확인하지 못했습니다.';
-        $('draw-sub').textContent = '잠시 후 다시 시도해 주세요.';
+        $('draw-title').textContent = '추첨 결과를 확인하지 못했습니다. (디버그 정보)';
+        $('draw-sub').textContent = `서버 오류: ${res.error}`;
       } else {
         $('draw-title').textContent = '아쉽지만 이번엔 당첨되지 않았습니다.';
         $('draw-sub').textContent = '참여해 주셔서 감사합니다.';
       }
     }catch(e){
       console.error('추첨 확인 실패', e);
-      $('draw-title').textContent = '추첨 결과를 확인하지 못했습니다.';
-      $('draw-sub').textContent = '네트워크 오류일 수 있어요. 잠시 후 새로고침해 다시 확인해 주세요.';
+      $('draw-title').textContent = '추첨 결과를 확인하지 못했습니다. (디버그 정보)';
+      $('draw-sub').textContent = `오류 종류: ${e.name} — ${e.message}`;
     }
   }
 
@@ -695,11 +725,7 @@
     $('consent-submit').disabled = true;
     $('consent-submit').textContent = '처리 중…';
     try{
-      await fetch(GAS_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action:'register', ...data })
-      });
+      await gasRequest({ action:'register', ...data });
     }catch(e){
       console.error('참가자 등록 실패', e);
     }
@@ -780,12 +806,7 @@
 
   async function adminRequest(action, data){
     try{
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action, token: adminToken, ...data })
-      });
-      return await res.json();
+      return await gasRequest({ action, token: adminToken, ...data });
     }catch(e){
       console.error('관리자 요청 실패', e);
       return null;
@@ -830,11 +851,7 @@
   $('admin-modal-bg').onclick = (e) => { if(e.target.id==='admin-modal-bg') $('admin-modal-bg').classList.add('hidden'); };
   $('admin-unlock').onclick = async () => {
     const pass = $('admin-pass').value;
-    const check = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'admin_check', token: pass })
-    }).then(r=>r.json()).catch(()=>({ok:false}));
+    const check = await gasRequest({ action:'admin_check', token: pass }).catch(()=>({ok:false}));
 
     if(check && check.ok){
       adminToken = pass;
