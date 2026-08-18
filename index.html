@@ -117,7 +117,7 @@
     75%{transform:translateX(3px);}
   }
   .problem-target{cursor:pointer; border-radius:2px; transition:background .1s ease;}
-  .problem-target:hover{background:var(--red-tint);}
+  .problem-target:hover{background:var(--blue-tint);}
   .problem-target.selected{background:var(--blue-tint); box-shadow:0 0 0 2px var(--blue);}
   .problem-target.limit-flash{animation:shake .3s ease;}
   .problem-target.found{
@@ -211,14 +211,21 @@
   @media(max-width:600px){ .hero{padding-top:30px;} .article-card{padding:22px 18px;} }
 
   /* 넓은 화면에서는 확인 버튼이 옆 여백에 고정되어 스크롤을 따라옴 */
-  @media(min-width:1100px){
+  /* 넓은 화면에서는 확인 버튼이 옆 여백에 고정되어 스크롤을 따라옴.
+     wrap 오른쪽 바깥 여백이 버튼 폭보다 충분히 넓을 때만(1400px~) 활성화하고,
+     버튼 자체 폭도 좁게 고정해서 본문을 침범하지 않게 한다. */
+  @media(min-width:1400px){
     #confirm-btn{
       position:fixed;
       top:50%;
-      right:calc(50vw - 360px - 170px);
+      right:28px;
       transform:translateY(-50%);
       z-index:40;
-      white-space:nowrap;
+      width:176px;
+      white-space:normal;
+      font-size:13px;
+      padding:14px 16px;
+      line-height:1.4;
     }
   }
 </style>
@@ -459,24 +466,35 @@
   }
 
   // ---------- marker parsing ----------
-  // [[문구|설명]] 를 클릭 가능한 정답 지점으로, 나머지는 단어 단위 오답 클릭 지점으로 렌더링
-  function renderPlain(str){
+  // 정답 문구든 일반 텍스트든 전부 단어 단위로 쪼개서 렌더링한다 (겉보기에 완전히 동일하게).
+  // 정답 문구가 여러 단어로 이루어진 경우, 각 단어는 별개의 span이지만 같은 data-key를 공유해서
+  // 하나를 클릭하면 같은 문구 전체가 함께 선택/공개되도록 내부적으로만 묶는다.
+  function renderPlain(str, counters){
     return str.split(/(\s+)/).map(chunk=>{
       if(chunk==='' || /^\s+$/.test(chunk)) return chunk;
-      return `<span class="wrong-target">${escapeHtml(chunk)}</span>`;
+      const key = 'w' + (counters.w++);
+      return `<span class="wrong-target" data-key="${key}">${escapeHtml(chunk)}</span>`;
     }).join('');
   }
 
-  function parseAndRender(text, idCounter){
+  function renderProblemPhrase(phrase, key, explanation){
+    return phrase.split(/(\s+)/).map(chunk=>{
+      if(chunk==='' || /^\s+$/.test(chunk)) return chunk;
+      return `<span class="problem-target" data-key="${key}" data-explanation="${escapeAttr(explanation)}">${escapeHtml(chunk)}</span>`;
+    }).join('');
+  }
+
+  function parseAndRender(text, counters){
     const regex = /\[\[(.*?)\|(.*?)\]\]/g;
     let lastIndex = 0, html = '', m;
     while((m = regex.exec(text))){
-      html += renderPlain(text.slice(lastIndex, m.index));
-      const id = 'p' + (idCounter.n++);
-      html += `<span class="problem-target" data-id="${id}" data-explanation="${escapeAttr(m[2])}">${escapeHtml(m[1])}</span>`;
+      html += renderPlain(text.slice(lastIndex, m.index), counters);
+      const id = 'p' + (counters.p++);
+      counters.problemIds.push(id);
+      html += renderProblemPhrase(m[1], id, m[2]);
       lastIndex = regex.lastIndex;
     }
-    html += renderPlain(text.slice(lastIndex));
+    html += renderPlain(text.slice(lastIndex), counters);
     return html;
   }
 
@@ -494,12 +512,12 @@
     wrongClicks = 0;
     selectedSet.clear();
     articleRevealed = false;
-    const idCounter = { n: 0 };
+    const counters = { p: 0, w: 0, problemIds: [] };
 
     $('q-outlet').textContent = c.outlet || '매체 미상';
-    $('q-headline').innerHTML = parseAndRender(c.headline || '', idCounter);
+    $('q-headline').innerHTML = parseAndRender(c.headline || '', counters);
     const paras = (c.body || '').split(/\n+/).filter(p => p.trim());
-    $('q-body').innerHTML = paras.map(p => `<div class="para">${parseAndRender(p, idCounter)}</div>`).join('');
+    $('q-body').innerHTML = paras.map(p => `<div class="para">${parseAndRender(p, counters)}</div>`).join('');
 
     if(c.sourceUrl){
       $('q-source').href = c.sourceUrl;
@@ -508,7 +526,8 @@
       $('q-source').classList.add('hidden');
     }
 
-    totalProblems = idCounter.n;
+    totalProblems = counters.p;
+    allProblemIds = counters.problemIds.slice();
     $('stage-name').textContent = `기사 ${queueIdx+1} / ${queue.length}`;
     $('confirm-btn').disabled = true;
     $('confirm-btn').classList.remove('hidden');
@@ -522,11 +541,11 @@
     $('progress-fill').style.width = totalProblems ? Math.round((selectedSet.size/totalProblems)*100)+'%' : '0%';
 
     if(selectedSet.size === 0){
-      $('confirm-btn').innerHTML = `<span class="btn-icon">☐</span> 먼저 부분을 선택하세요`;
+      $('confirm-btn').innerHTML = `<span class="btn-icon">☐</span> 선택하세요`;
       $('confirm-btn').classList.remove('btn-ready');
       $('confirm-btn').disabled = true;
     } else {
-      $('confirm-btn').innerHTML = `<span class="btn-icon">✓</span> 선택 완료 — 채점하기 (${selectedSet.size}/${totalProblems})`;
+      $('confirm-btn').innerHTML = `<span class="btn-icon">✓</span> 채점하기 (${selectedSet.size}/${totalProblems})`;
       $('confirm-btn').classList.add('btn-ready');
       $('confirm-btn').disabled = false;
     }
@@ -534,29 +553,38 @@
 
   let selectedSet = new Set();
   let articleRevealed = false;
+  let allProblemIds = [];
 
   document.getElementById('q-body').addEventListener('click', handleArticleClick);
   document.getElementById('q-headline').addEventListener('click', handleArticleClick);
+
+  function groupFor(key){
+    return document.querySelectorAll(`[data-key="${key}"]`);
+  }
 
   function handleArticleClick(e){
     if(articleRevealed) return;
     const target = e.target.closest('.problem-target, .wrong-target');
     if(!target) return;
+    const key = target.dataset.key;
+    const group = groupFor(key);
 
-    if(selectedSet.has(target)){
-      selectedSet.delete(target);
-      target.classList.remove('selected');
+    if(selectedSet.has(key)){
+      selectedSet.delete(key);
+      group.forEach(el=>el.classList.remove('selected'));
       updateSelectionUI();
       return;
     }
     if(selectedSet.size >= totalProblems){
       // 선택 가능 개수를 다 채운 상태 — 살짝 흔들어서 한도에 닿았음을 알려줌
-      target.classList.add('limit-flash');
-      setTimeout(()=>target.classList.remove('limit-flash'), 300);
+      group.forEach(el=>{
+        el.classList.add('limit-flash');
+        setTimeout(()=>el.classList.remove('limit-flash'), 300);
+      });
       return;
     }
-    selectedSet.add(target);
-    target.classList.add('selected');
+    selectedSet.add(key);
+    group.forEach(el=>el.classList.add('selected'));
     updateSelectionUI();
   }
 
@@ -565,24 +593,29 @@
     articleRevealed = true;
 
     let correctCount = 0, wrongCount = 0;
-    selectedSet.forEach(target=>{
-      target.classList.remove('selected');
-      if(target.classList.contains('problem-target')){
+    selectedSet.forEach(key=>{
+      const group = groupFor(key);
+      const first = group[0];
+      group.forEach(el=>el.classList.remove('selected'));
+      if(first && first.classList.contains('problem-target')){
         correctCount++;
-        target.classList.add('found');
-        foundIds.add(target.dataset.id);
-        addExplainNote(target, '✓ 정답입니다', target.dataset.explanation);
+        foundIds.add(key);
+        group.forEach(el=>el.classList.add('found'));
+        addExplainNote(first, '✓ 정답입니다', first.dataset.explanation);
       } else {
         wrongCount++;
-        target.classList.add('wrong-final');
+        group.forEach(el=>el.classList.add('wrong-final'));
       }
     });
     selectedSet.clear();
 
     // 놓친 정답이 있으면 전부 공개
-    document.querySelectorAll('#q-headline .problem-target:not(.found), #q-body .problem-target:not(.found)').forEach(pt=>{
-      pt.classList.add('found', 'missed');
-      addExplainNote(pt, '→ 놓친 표현', pt.dataset.explanation);
+    allProblemIds.forEach(id=>{
+      if(foundIds.has(id)) return;
+      const group = groupFor(id);
+      if(group.length === 0) return;
+      group.forEach(el=>el.classList.add('found', 'missed'));
+      addExplainNote(group[0], '→ 놓친 표현', group[0].dataset.explanation);
     });
 
     wrongClicks = wrongCount;
