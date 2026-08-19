@@ -102,39 +102,39 @@
   .article-card .headline{
     font-family:'Noto Serif KR', serif; font-weight:600; font-size:22px; line-height:1.42; margin-bottom:18px;
   }
-  .article-card .body-text .para{font-size:15px; margin-bottom:14px; line-height:1.75; user-select:text;}
-  .article-card .headline{user-select:text;}
+  .article-card .body-text .para{font-size:15px; margin-bottom:14px; line-height:1.75;}
 
-  mark.user-pick{
-    background:var(--blue-tint);
-    box-shadow:0 0 0 2px var(--blue);
-    border-radius:2px;
-    padding:0 1px;
-    cursor:pointer;
-    color:inherit;
+  /* 정답/오답 후보 — 둘 다 클릭 전에는 완전히 동일하게 보인다 (색상·테두리 차이 없음) */
+  .pick-target{cursor:pointer; border-radius:2px; transition:background .12s ease;}
+  .pick-target:hover{background:var(--blue-tint);}
+  .pick-target.selected{background:var(--blue-tint); box-shadow:0 0 0 2px var(--blue);}
+  .pick-target.limit-flash{animation:shake .3s ease;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-3px);}
+    75%{transform:translateX(3px);}
   }
-  mark.user-pick.found{
-    cursor:default;
-    box-shadow:none;
+  .pick-target.found{
+    cursor:default; box-shadow:none;
     background:var(--amber-tint);
     text-decoration: underline wavy var(--red);
     text-decoration-thickness:1.5px;
     text-underline-offset:4px;
     font-weight:600;
+    padding:0 1px;
   }
-  mark.user-pick.missed{
-    box-shadow:none;
+  .pick-target.found.missed{
     background:var(--blue-tint);
     text-decoration-color:var(--blue);
   }
-  mark.user-pick.wrong-final{
-    cursor:default;
-    box-shadow:none;
+  .pick-target.wrong-final{
+    cursor:default; box-shadow:none;
     background:var(--red-tint);
     color:var(--red-dark);
     text-decoration:line-through;
     text-decoration-color:var(--red);
     opacity:0.9;
+    padding:0 1px;
   }
 
   .pick-warning{
@@ -199,10 +199,12 @@
     font-family:'Pretendard', sans-serif; font-size:14px; border-radius:var(--radius);
   }
   .modal textarea{min-height:90px; resize:vertical; font-family:'IBM Plex Mono', monospace; font-size:13px;}
+  .mark-helper-row{display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;}
   .mark-helper{
     font-family:'IBM Plex Mono', monospace; font-size:11px; background:var(--surface);
-    border:1px solid var(--red); color:var(--red); padding:5px 10px; cursor:pointer; margin-top:6px; border-radius:var(--radius);
+    border:1px solid var(--red); color:var(--red); padding:5px 10px; cursor:pointer; border-radius:var(--radius);
   }
+  .mark-helper.decoy{border-color:var(--blue); color:var(--blue);}
   .admin-case-row{
     display:flex; justify-content:space-between; align-items:flex-start;
     padding:10px 0; border-bottom:1px solid var(--line); gap:10px;
@@ -306,7 +308,7 @@
       <div class="stage-count" id="stage-count">발견 0 / 0 · 오답 0회</div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    <div class="instr-line">차별/편견이라고 생각되는 부분을 마우스로 드래그(모바일은 길게 눌러서)해서 직접 범위를 선택한 뒤 확인 버튼을 눌러주세요. 최대 정답 수만큼 선택할 수 있어요.</div>
+    <div class="instr-line">차별/편견이라고 생각되는 부분을 눌러 선택한 뒤(최대 정답 수만큼) 확인 버튼을 눌러주세요.</div>
     <div class="pick-warning hidden" id="pick-warning"></div>
 
     <div class="article-card">
@@ -389,13 +391,19 @@
       <h3 style="margin-top:22px;" id="admin-form-title">새 기사 추가</h3>
       <label>언론사 / 매체</label>
       <input type="text" id="f-outlet" placeholder="예: OO일보">
-      <label>헤드라인 — 문제 표현은 [[문구|설명]] 형식으로 감싸기</label>
+      <label>헤드라인 — 정답은 [[문구|설명]], 오답 후보는 {{문구}} 형식으로 감싸기</label>
       <textarea id="f-headline" placeholder="예: 구로구 모친 살해 [[조현병 20대|질환명과 범죄를 인과관계처럼...]], 1심 징역 12년"></textarea>
-      <button class="mark-helper" data-target="f-headline">선택 영역을 문제 표현으로 표시</button>
+      <div class="mark-helper-row">
+        <button class="mark-helper" data-target="f-headline" data-kind="correct">선택 영역을 정답으로 표시</button>
+        <button class="mark-helper decoy" data-target="f-headline" data-kind="decoy">선택 영역을 오답 후보로 표시</button>
+      </div>
 
-      <label>본문 — 문단 구분은 줄바꿈(Enter), 문제 표현은 [[문구|설명]] 형식</label>
+      <label>본문 — 문단 구분은 줄바꿈(Enter), 정답 [[문구|설명]] / 오답 후보 {{문구}} 형식</label>
       <textarea id="f-body" style="min-height:160px;" placeholder="문단1...&#10;&#10;문단2..."></textarea>
-      <button class="mark-helper" data-target="f-body">선택 영역을 문제 표현으로 표시</button>
+      <div class="mark-helper-row">
+        <button class="mark-helper" data-target="f-body" data-kind="correct">선택 영역을 정답으로 표시</button>
+        <button class="mark-helper decoy" data-target="f-body" data-kind="decoy">선택 영역을 오답 후보로 표시</button>
+      </div>
 
       <label>출처 링크 (선택)</label>
       <input type="text" id="f-source" placeholder="https://...">
@@ -474,18 +482,26 @@
   }
 
   // ---------- marker parsing ----------
-  // [[문구|설명]] 마커를 제거하고 평문으로 렌더링한다. 정답 위치는 별도 배열에 텍스트로만 기억해두고,
-  // 참여자가 마우스로 자유롭게 드래그해서 선택한 범위와 텍스트를 비교해서 채점한다.
-  // (미리 클릭 지점을 나눠두지 않기 때문에, 어떤 걸 클릭해도 정답 여부가 미리 티나지 않는다.)
-  function extractPlainAndAnswers(text, answers){
-    return (text || '').replace(/\[\[(.*?)\|(.*?)\]\]/g, (match, phrase, explanation) => {
-      answers.push({ text: phrase, explanation });
-      return phrase;
-    });
-  }
-
-  function normalizeForMatch(s){
-    return (s || '').replace(/\s+/g, '').replace(/['""''.,!?…·]/g, '');
+  // 관리자가 미리 표시해둔 두 종류의 후보만 클릭 가능하다:
+  // [[정답 문구|설명]] — 실제 정답, {{오답 후보 문구|설명(선택)}} — 관리자가 고른 그럴듯한 오답.
+  // 둘 다 문구 전체를 하나의 span으로 렌더링하고, 클릭 전에는 스타일이 완전히 동일해서 구분되지 않는다.
+  function parseAndRender(text, counters){
+    const regex = /\[\[(.*?)\|(.*?)\]\]|\{\{(.*?)(?:\|(.*?))?\}\}/g;
+    let lastIndex = 0, html = '', m;
+    while((m = regex.exec(text))){
+      html += escapeHtml(text.slice(lastIndex, m.index));
+      if(m[1] !== undefined){
+        const id = 'p' + (counters.p++);
+        counters.correctIds.push(id);
+        html += `<span class="pick-target correct" data-key="${id}" data-explanation="${escapeAttr(m[2] || '')}">${escapeHtml(m[1])}</span>`;
+      } else {
+        const id = 'd' + (counters.d++);
+        html += `<span class="pick-target decoy" data-key="${id}" data-explanation="${escapeAttr(m[4] || '')}">${escapeHtml(m[3])}</span>`;
+      }
+      lastIndex = regex.lastIndex;
+    }
+    html += escapeHtml(text.slice(lastIndex));
+    return html;
   }
 
   function startSession(){
@@ -499,17 +515,14 @@
   function loadCase(c){
     currentCase = c;
     wrongClicks = 0;
-    selectedGuesses = [];
+    selectedEls.clear();
     articleRevealed = false;
-    caseAnswers = [];
-
-    const headlinePlain = extractPlainAndAnswers(c.headline || '', caseAnswers);
-    const paras = (c.body || '').split(/\n+/).filter(p => p.trim());
-    const bodyPlains = paras.map(p => extractPlainAndAnswers(p, caseAnswers));
+    const counters = { p: 0, d: 0, correctIds: [] };
 
     $('q-outlet').textContent = c.outlet || '매체 미상';
-    $('q-headline').textContent = headlinePlain;
-    $('q-body').innerHTML = bodyPlains.map(p => `<div class="para">${escapeHtml(p)}</div>`).join('');
+    $('q-headline').innerHTML = parseAndRender(c.headline || '', counters);
+    const paras = (c.body || '').split(/\n+/).filter(p => p.trim());
+    $('q-body').innerHTML = paras.map(p => `<div class="para">${parseAndRender(p, counters)}</div>`).join('');
 
     if(c.sourceUrl){
       $('q-source').href = c.sourceUrl;
@@ -518,7 +531,7 @@
       $('q-source').classList.add('hidden');
     }
 
-    totalProblems = caseAnswers.length;
+    totalProblems = counters.correctIds.length;
     $('stage-name').textContent = `기사 ${queueIdx+1} / ${queue.length}`;
     $('confirm-btn').disabled = true;
     $('confirm-btn').classList.remove('hidden');
@@ -529,15 +542,15 @@
   }
 
   function updateSelectionUI(){
-    $('stage-count').textContent = `선택 ${selectedGuesses.length} / ${totalProblems}`;
-    $('progress-fill').style.width = totalProblems ? Math.round((selectedGuesses.length/totalProblems)*100)+'%' : '0%';
+    $('stage-count').textContent = `선택 ${selectedEls.size} / ${totalProblems}`;
+    $('progress-fill').style.width = totalProblems ? Math.round((selectedEls.size/totalProblems)*100)+'%' : '0%';
 
-    if(selectedGuesses.length === 0){
+    if(selectedEls.size === 0){
       $('confirm-btn').innerHTML = `<span class="btn-icon">☐</span> 선택하세요`;
       $('confirm-btn').classList.remove('btn-ready');
       $('confirm-btn').disabled = true;
     } else {
-      $('confirm-btn').innerHTML = `<span class="btn-icon">✓</span> 채점하기 (${selectedGuesses.length}/${totalProblems})`;
+      $('confirm-btn').innerHTML = `<span class="btn-icon">✓</span> 채점하기 (${selectedEls.size}/${totalProblems})`;
       $('confirm-btn').classList.add('btn-ready');
       $('confirm-btn').disabled = false;
     }
@@ -551,97 +564,59 @@
     showPickWarning._t = setTimeout(()=>el.classList.add('hidden'), 2200);
   }
 
-  let selectedGuesses = []; // { markEl, text }
+  let selectedEls = new Set();
   let articleRevealed = false;
-  let caseAnswers = []; // { text, explanation }
 
-  function onSelectionEnd(){
+  function handleArticleClick(e){
     if(articleRevealed) return;
-    const sel = window.getSelection();
-    if(!sel || sel.isCollapsed) return;
-    const text = sel.toString().trim();
-    if(!text){ sel.removeAllRanges(); return; }
+    const target = e.target.closest('.pick-target');
+    if(!target) return;
 
-    // 기사 영역(q-headline / q-body) 안에서 이루어진 선택만 인정
-    const anchorInside = $('q-headline').contains(sel.anchorNode) || $('q-body').contains(sel.anchorNode);
-    if(!anchorInside){ return; }
-
-    if(selectedGuesses.length >= totalProblems){
-      sel.removeAllRanges();
+    if(selectedEls.has(target)){
+      selectedEls.delete(target);
+      target.classList.remove('selected');
+      updateSelectionUI();
+      return;
+    }
+    if(selectedEls.size >= totalProblems){
+      target.classList.add('limit-flash');
+      setTimeout(()=>target.classList.remove('limit-flash'), 300);
       showPickWarning(`이미 정답 개수(${totalProblems}개)만큼 선택했어요. 다시 선택하려면 표시된 부분을 눌러 해제하세요.`);
       return;
     }
-
-    const range = sel.getRangeAt(0);
-    const mark = document.createElement('mark');
-    mark.className = 'user-pick';
-    try{
-      range.surroundContents(mark);
-    }catch(err){
-      sel.removeAllRanges();
-      showPickWarning('여러 문단에 걸치거나 이미 선택한 부분과 겹쳐서 표시할 수 없어요. 한 문단 안에서 다시 선택해 주세요.');
-      return;
-    }
-    sel.removeAllRanges();
-    mark.addEventListener('click', () => removeGuess(mark));
-    selectedGuesses.push({ markEl: mark, text });
+    selectedEls.add(target);
+    target.classList.add('selected');
     updateSelectionUI();
   }
 
-  function removeGuess(mark){
-    if(articleRevealed) return;
-    selectedGuesses = selectedGuesses.filter(g => g.markEl !== mark);
-    const parent = mark.parentNode;
-    if(parent){
-      while(mark.firstChild) parent.insertBefore(mark.firstChild, mark);
-      parent.removeChild(mark);
-      parent.normalize();
-    }
-    updateSelectionUI();
-  }
-
-  ['mouseup','touchend'].forEach(evt=>{
-    $('q-headline').addEventListener(evt, onSelectionEnd);
-    $('q-body').addEventListener(evt, onSelectionEnd);
-  });
+  $('q-headline').addEventListener('click', handleArticleClick);
+  $('q-body').addEventListener('click', handleArticleClick);
 
   function confirmSelection(){
-    if(selectedGuesses.length === 0 || articleRevealed) return;
+    if(selectedEls.size === 0 || articleRevealed) return;
     articleRevealed = true;
 
-    const matchedIdx = new Set();
     let correctCount = 0, wrongCount = 0;
-
-    selectedGuesses.forEach(g=>{
-      const normGuess = normalizeForMatch(g.text);
-      let matchIdx = -1;
-      caseAnswers.forEach((a, i)=>{
-        if(matchIdx !== -1 || matchedIdx.has(i)) return;
-        const normAns = normalizeForMatch(a.text);
-        if(normAns && (normGuess.includes(normAns) || normAns.includes(normGuess))){
-          matchIdx = i;
-        }
-      });
-      if(matchIdx !== -1){
-        matchedIdx.add(matchIdx);
+    selectedEls.forEach(target=>{
+      target.classList.remove('selected');
+      if(target.classList.contains('correct')){
         correctCount++;
-        g.markEl.classList.add('found');
-        addExplainNote(g.markEl, '✓ 정답입니다', caseAnswers[matchIdx].explanation);
+        target.classList.add('found');
+        addExplainNote(target, '✓ 정답입니다', target.dataset.explanation);
       } else {
         wrongCount++;
-        g.markEl.classList.add('wrong-final');
+        target.classList.add('wrong-final');
+        if(target.dataset.explanation){
+          addExplainNote(target, '✕ 오답입니다', target.dataset.explanation);
+        }
       }
     });
-    selectedGuesses = [];
+    selectedEls.clear();
 
-    // 놓친 정답이 있으면 원문에서 찾아 전부 공개
-    caseAnswers.forEach((a, i)=>{
-      if(matchedIdx.has(i)) return;
-      const mark = findAndWrapText($('q-headline'), a.text) || findAndWrapText($('q-body'), a.text);
-      if(mark){
-        mark.classList.add('found', 'missed');
-        addExplainNote(mark, '→ 놓친 표현', a.explanation);
-      }
+    // 놓친 정답이 있으면 전부 공개
+    document.querySelectorAll('#q-headline .pick-target.correct:not(.found), #q-body .pick-target.correct:not(.found)').forEach(el=>{
+      el.classList.add('found', 'missed');
+      addExplainNote(el, '→ 놓친 표현', el.dataset.explanation);
     });
 
     wrongClicks = wrongCount;
@@ -649,33 +624,6 @@
     $('progress-fill').style.width = totalProblems ? Math.round((correctCount/totalProblems)*100)+'%' : '0%';
 
     onArticleComplete(correctCount, wrongCount);
-  }
-
-  function findAndWrapText(root, needle){
-    if(!needle) return null;
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-      acceptNode(node){
-        return (node.parentElement && node.parentElement.closest('mark')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
-      }
-    });
-    let node;
-    while((node = walker.nextNode())){
-      const idx = node.textContent.indexOf(needle);
-      if(idx !== -1){
-        const range = document.createRange();
-        range.setStart(node, idx);
-        range.setEnd(node, idx + needle.length);
-        const mark = document.createElement('mark');
-        mark.className = 'user-pick';
-        try{
-          range.surroundContents(mark);
-          return mark;
-        }catch(e){
-          return null;
-        }
-      }
-    }
-    return null;
   }
 
   function addExplainNote(target, markText, explanation){
@@ -792,7 +740,8 @@
 
   // ---------- consent form ----------
   function checkConsentReady(){
-    const ready = $('c-name').value.trim() && $('c-phone').value.trim() && $('c-address').value.trim() && $('c-consent').checked;
+    const phoneDigits = ($('c-phone').value.match(/\d/g) || []).length;
+    const ready = $('c-name').value.trim() && phoneDigits >= 7 && $('c-address').value.trim() && $('c-consent').checked;
     $('consent-submit').disabled = !ready;
   }
   ['c-name','c-phone','c-address'].forEach(id=>{
@@ -879,12 +828,21 @@
     document.querySelectorAll('.mark-helper').forEach(btn=>{
       btn.onclick = () => {
         const ta = $(btn.getAttribute('data-target'));
+        const kind = btn.getAttribute('data-kind');
         const start = ta.selectionStart, end = ta.selectionEnd;
         const selected = ta.value.slice(start, end);
-        if(!selected){ alert('먼저 문제라고 표시할 문구를 마우스로 드래그해서 선택해 주세요.'); return; }
-        const explanation = prompt('이 표현이 왜 문제인지 설명을 입력하세요:', '');
-        if(explanation === null) return;
-        const replaced = `[[${selected}|${explanation}]]`;
+        if(!selected){ alert('먼저 표시할 문구를 마우스로 드래그해서 선택해 주세요.'); return; }
+
+        let replaced;
+        if(kind === 'correct'){
+          const explanation = prompt('이 표현이 왜 문제(정답)인지 설명을 입력하세요:', '');
+          if(explanation === null) return;
+          replaced = `[[${selected}|${explanation}]]`;
+        } else {
+          const note = prompt('오답 후보입니다. 선택했을 때 보여줄 설명(선택 사항, 비워둬도 됨):', '');
+          if(note === null) return;
+          replaced = note ? `{{${selected}|${note}}}` : `{{${selected}}}`;
+        }
         ta.value = ta.value.slice(0,start) + replaced + ta.value.slice(end);
       };
     });
