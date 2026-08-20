@@ -631,7 +631,9 @@
     note.className = 'explain-note';
     note.innerHTML = `<span class="mark">${markText}</span><span>${escapeHtml(explanation)}</span>`;
     const container = target.closest('.para') || target.closest('.headline');
-    container.insertAdjacentElement('afterend', note);
+    // 컨테이너 '안쪽'에 붙여야 다음 기사를 불러올 때(headline.textContent/body.innerHTML 교체) 같이 지워진다.
+    // 이전에는 afterend로 컨테이너 '바깥'에 붙어서, 헤드라인 설명이 기사 전환 시 지워지지 않고 계속 쌓이는 버그가 있었다.
+    container.appendChild(note);
   }
 
   function onArticleComplete(correctCount, wrongCount){
