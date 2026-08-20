@@ -11,6 +11,7 @@
     --page:#F4F3EF; --surface:#FFFFFF; --surface-soft:#FAFAF7;
     --ink:#1B1B1E; --ink-soft:#68675F;
     --red:#A32D2D; --red-dark:#791F1F; --red-tint:#FCEBEB;
+    --green:#2F7D4F; --green-dark:#20603A; --green-tint:#E4F2E8;
     --blue:#185FA5; --blue-tint:#E6F1FB;
     --amber-tint:#FAEEDA;
     --line:#E3E1D8; --radius:8px; --radius-card:12px;
@@ -116,16 +117,17 @@
   }
   .pick-target.found{
     cursor:default; box-shadow:none;
-    background:var(--amber-tint);
-    text-decoration: underline wavy var(--red);
+    background:var(--green-tint);
+    text-decoration: underline wavy var(--green);
     text-decoration-thickness:1.5px;
     text-underline-offset:4px;
     font-weight:600;
     padding:0 1px;
   }
   .pick-target.found.missed{
-    background:var(--blue-tint);
-    text-decoration-color:var(--blue);
+    background:var(--red-tint);
+    color:var(--red-dark);
+    text-decoration-color:var(--red);
   }
   .pick-target.wrong-final{
     cursor:default; box-shadow:none;
@@ -143,11 +145,16 @@
   }
 
   .explain-note{
-    margin-top:8px; padding:10px 14px; background:var(--red-tint);
-    border-left:3px solid var(--red); border-radius:0 var(--radius) var(--radius) 0; font-size:13.5px; color:var(--ink);
+    margin-top:8px; padding:10px 14px; background:var(--green-tint);
+    border-left:3px solid var(--green); border-radius:0 var(--radius) var(--radius) 0; font-size:13.5px; color:var(--ink);
     display:flex; gap:8px; align-items:flex-start;
   }
-  .explain-note .mark{color:var(--red); font-weight:700; flex-shrink:0;}
+  .explain-note .mark{color:var(--green-dark); font-weight:700; flex-shrink:0;}
+  .explain-note.warn{
+    background:var(--red-tint);
+    border-left-color:var(--red);
+  }
+  .explain-note.warn .mark{color:var(--red);}
   .article-card a.source{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--blue); text-decoration:underline; display:inline-block; margin-top:10px;}
 
   .complete-banner{
@@ -158,6 +165,12 @@
     font-weight:600; font-size:12px; letter-spacing:0.1em; padding:6px 14px; border-radius:var(--radius);
   }
   .end-actions{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:40px;}
+
+  /* opinion (나는 이렇게 생각해요) */
+  .opinion-section{margin-bottom:18px;}
+  .opinion-list-wrap{margin-top:14px;}
+  .opinion-list-title{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); margin-bottom:8px;}
+  .opinion-item{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px; font-size:13.5px; margin-bottom:8px; line-height:1.6;}
 
   /* final summary */
   .summary-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-card); padding:30px 26px; margin-bottom:24px; text-align:center;}
@@ -325,6 +338,15 @@
     <div class="complete-banner hidden" id="complete-banner">
       <div class="stamp">모두 찾았습니다</div>
     </div>
+
+    <div class="opinion-section hidden" id="opinion-section">
+      <button class="btn btn-ghost" id="opinion-open-btn">나는 이렇게 생각해요</button>
+      <div class="opinion-list-wrap">
+        <div class="opinion-list-title">다른 사람들은 어떻게 생각했을까요?</div>
+        <div id="opinion-list"></div>
+      </div>
+    </div>
+
     <div class="end-actions">
       <button class="btn btn-primary hidden" id="next-btn">다음 기사</button>
     </div>
@@ -347,6 +369,7 @@
     <div class="end-actions">
       <button class="btn btn-primary" id="restart-btn">다시 하기</button>
       <button class="btn btn-ghost" id="summary-stats-btn">누적 통계 보기</button>
+      <button class="btn btn-ghost" id="report-btn">편견/차별 제보하기</button>
     </div>
   </section>
 
@@ -362,6 +385,34 @@
 </div>
 
 <button class="admin-gear" id="admin-gear" title="관리자">⚙</button>
+
+<!-- ============ OPINION MODAL ============ -->
+<div class="modal-bg hidden" id="opinion-modal-bg">
+  <div class="modal">
+    <button class="modal-close" id="opinion-modal-close">닫기 ✕</button>
+    <h3>나는 이렇게 생각해요</h3>
+    <div class="sub">이름 없이 익명으로 남겨집니다.</div>
+    <label>의견</label>
+    <textarea id="opinion-text" placeholder="이 표현에 대해 어떻게 생각하시나요?"></textarea>
+    <div class="modal-actions"><button class="btn btn-primary" id="opinion-submit">의견 남기기</button></div>
+    <div class="admin-error" id="opinion-error"></div>
+  </div>
+</div>
+
+<!-- ============ REPORT MODAL ============ -->
+<div class="modal-bg hidden" id="report-modal-bg">
+  <div class="modal">
+    <button class="modal-close" id="report-modal-close">닫기 ✕</button>
+    <h3>편견/차별 제보하기</h3>
+    <div class="sub">발견하신 편견·차별 표현이 담긴 기사나 게시물을 알려주세요.</div>
+    <label>URL</label>
+    <input type="text" id="report-url" placeholder="https://...">
+    <label>의견 (어떤 부분이 문제라고 생각하시나요?)</label>
+    <textarea id="report-text" placeholder="자유롭게 작성해 주세요"></textarea>
+    <div class="modal-actions"><button class="btn btn-primary" id="report-submit">제보하기</button></div>
+    <div class="admin-error" id="report-error"></div>
+  </div>
+</div>
 
 <!-- ============ ADMIN MODAL ============ -->
 <div class="modal-bg hidden" id="admin-modal-bg">
@@ -432,6 +483,7 @@
   let sessionTotal = 0;
   let sessionWrong = 0;
   let participantPhone = '';
+  let participantName = '';
 
   const $ = (id) => document.getElementById(id);
 
@@ -538,6 +590,7 @@
     $('complete-banner').classList.add('hidden');
     $('next-btn').classList.add('hidden');
     $('pick-warning').classList.add('hidden');
+    $('opinion-section').classList.add('hidden');
     updateSelectionUI();
   }
 
@@ -602,12 +655,12 @@
       if(target.classList.contains('correct')){
         correctCount++;
         target.classList.add('found');
-        addExplainNote(target, '✓ 정답입니다', target.dataset.explanation);
+        addExplainNote(target, '✓ 정답입니다', target.dataset.explanation, 'good');
       } else {
         wrongCount++;
         target.classList.add('wrong-final');
         if(target.dataset.explanation){
-          addExplainNote(target, '✕ 오답입니다', target.dataset.explanation);
+          addExplainNote(target, '✕ 오답입니다', target.dataset.explanation, 'warn');
         }
       }
     });
@@ -616,7 +669,7 @@
     // 놓친 정답이 있으면 전부 공개
     document.querySelectorAll('#q-headline .pick-target.correct:not(.found), #q-body .pick-target.correct:not(.found)').forEach(el=>{
       el.classList.add('found', 'missed');
-      addExplainNote(el, '→ 놓친 표현', el.dataset.explanation);
+      addExplainNote(el, '→ 놓친 표현', el.dataset.explanation, 'warn');
     });
 
     wrongClicks = wrongCount;
@@ -626,9 +679,9 @@
     onArticleComplete(correctCount, wrongCount);
   }
 
-  function addExplainNote(target, markText, explanation){
+  function addExplainNote(target, markText, explanation, variant){
     const note = document.createElement('div');
-    note.className = 'explain-note';
+    note.className = 'explain-note' + (variant === 'warn' ? ' warn' : '');
     note.innerHTML = `<span class="mark">${markText}</span><span>${escapeHtml(explanation)}</span>`;
     const container = target.closest('.para') || target.closest('.headline');
     // 컨테이너 '안쪽'에 붙여야 다음 기사를 불러올 때(headline.textContent/body.innerHTML 교체) 같이 지워진다.
@@ -644,6 +697,7 @@
     sessionTotal += totalProblems;
     sessionWrong += wrongCount;
     sendCompletion(correctCount, wrongCount);
+    showOpinionSection(currentCase.id);
   }
 
   function sendCompletion(correctCount, wrongCount){
@@ -759,6 +813,7 @@
       consent: $('c-consent').checked
     };
     participantPhone = data.phone;
+    participantName = data.name;
     $('consent-submit').disabled = true;
     $('consent-submit').textContent = '처리 중…';
     try{
@@ -769,6 +824,73 @@
     $('consent-submit').textContent = '동의하고 시작하기';
     startSession();
   }
+
+  // ---------- opinion (나는 이렇게 생각해요) ----------
+  let opinionCaseId = null;
+
+  function showOpinionSection(caseId){
+    opinionCaseId = caseId;
+    $('opinion-section').classList.remove('hidden');
+    loadOpinions(caseId);
+  }
+
+  async function loadOpinions(caseId){
+    $('opinion-list').innerHTML = `<div class="empty-note">불러오는 중…</div>`;
+    const res = await gasRequest({ action:'get_opinions', caseId }).catch(()=>null);
+    const list = (res && res.opinions) || [];
+    $('opinion-list').innerHTML = list.length
+      ? list.map(t=>`<div class="opinion-item">${escapeHtml(t)}</div>`).join('')
+      : `<div class="empty-note">아직 남겨진 의견이 없어요. 첫 의견을 남겨보세요.</div>`;
+  }
+
+  $('opinion-open-btn').onclick = () => {
+    $('opinion-modal-bg').classList.remove('hidden');
+    $('opinion-text').value = '';
+    $('opinion-error').textContent = '';
+  };
+  $('opinion-modal-close').onclick = () => $('opinion-modal-bg').classList.add('hidden');
+  $('opinion-modal-bg').onclick = (e) => { if(e.target.id==='opinion-modal-bg') $('opinion-modal-bg').classList.add('hidden'); };
+  $('opinion-submit').onclick = async () => {
+    const text = $('opinion-text').value.trim();
+    if(!text){ $('opinion-error').textContent = '의견을 입력해 주세요.'; return; }
+    $('opinion-submit').disabled = true;
+    const res = await gasRequest({ action:'add_opinion', caseId: opinionCaseId, text }).catch(()=>null);
+    $('opinion-submit').disabled = false;
+    if(res && res.ok){
+      $('opinion-modal-bg').classList.add('hidden');
+      loadOpinions(opinionCaseId);
+    } else {
+      $('opinion-error').textContent = '저장에 실패했습니다. 다시 시도해 주세요.';
+    }
+  };
+
+  // ---------- report (편견/차별 제보하기) ----------
+  $('report-btn').onclick = () => {
+    $('report-modal-bg').classList.remove('hidden');
+    $('report-url').value = '';
+    $('report-text').value = '';
+    $('report-error').textContent = '';
+  };
+  $('report-modal-close').onclick = () => $('report-modal-bg').classList.add('hidden');
+  $('report-modal-bg').onclick = (e) => { if(e.target.id==='report-modal-bg') $('report-modal-bg').classList.add('hidden'); };
+  $('report-submit').onclick = async () => {
+    const url = $('report-url').value.trim();
+    const text = $('report-text').value.trim();
+    if(!url && !text){ $('report-error').textContent = 'URL 또는 의견 중 하나는 입력해 주세요.'; return; }
+    $('report-submit').disabled = true;
+    const res = await gasRequest({
+      action:'report_case', url, text,
+      name: participantName, phone: participantPhone
+    }).catch(()=>null);
+    $('report-submit').disabled = false;
+    if(res && res.ok){
+      $('report-modal-bg').classList.add('hidden');
+      $('report-error').textContent = '';
+      alert('제보해 주셔서 감사합니다.');
+    } else {
+      $('report-error').textContent = '제보 접수에 실패했습니다. 다시 시도해 주세요.';
+    }
+  };
 
   // ---------- admin ----------
   let adminToken = null;
