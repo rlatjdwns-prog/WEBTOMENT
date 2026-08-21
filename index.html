@@ -159,7 +159,10 @@
 
   .complete-banner{
     text-align:center; margin:0 0 18px;
+    display:flex; flex-direction:column; align-items:center; gap:14px;
   }
+  .complete-banner .stamp{color:var(--green); border-color:var(--green);}
+  .complete-banner #next-btn{width:100%; max-width:280px;}
   .stamp{
     display:inline-block; border:1px solid var(--red); color:var(--red); font-family:'IBM Plex Mono', monospace;
     font-weight:600; font-size:12px; letter-spacing:0.1em; padding:6px 14px; border-radius:var(--radius);
@@ -337,6 +340,7 @@
 
     <div class="complete-banner hidden" id="complete-banner">
       <div class="stamp">모두 찾았습니다</div>
+      <button class="btn btn-primary hidden" id="next-btn">다음 기사</button>
     </div>
 
     <div class="opinion-section hidden" id="opinion-section">
@@ -345,10 +349,6 @@
         <div class="opinion-list-title">다른 사람들은 어떻게 생각했을까요?</div>
         <div id="opinion-list"></div>
       </div>
-    </div>
-
-    <div class="end-actions">
-      <button class="btn btn-primary hidden" id="next-btn">다음 기사</button>
     </div>
   </section>
 
